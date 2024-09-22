@@ -7,8 +7,9 @@ import java.util.List;
 public class PageReader {
 
 	/**
-	 * Read xhtml-files in given filepath
-	 * @param dir
+	 * Reads in xhtml pages in the given directory paths
+	 * @param dirPath absolute directory paths
+	 * @return list of xhtml files as List<File>
 	 */
 	public List<File> filterPages(String ...dirPath) {
 		
@@ -35,8 +36,10 @@ public class PageReader {
 	
 	
 	/**
-	 * Read xhtml-files in given filepath recursively
-	 * @param dir
+	 * Reads in xhtml pages in the given directory paths, 
+	 * including the subdirectories of given directory
+	 * @param dirPath absolute directory paths
+	 * @return list of xhtml files as List<File>
 	 */
 	public List<File> filterPagesRecursive(String ...dirPath) {
 		if(dirPath == null) {
@@ -60,7 +63,12 @@ public class PageReader {
 		return files;
 	}
 	
-	public List<File> readDirectoriesRec(String dirPath) {
+	/**
+	 * Reads directories paths recursively. Helper function for filterPagesRecursive()
+	 * @param dirPath
+	 * @return list of directories as List<File>
+	 */
+	private List<File> readDirectoriesRec(String dirPath) {
 		List<File> dirs = new ArrayList<>();
 		dirs.add(new File(dirPath));
 		for(File file : new File(dirPath).listFiles()) {
