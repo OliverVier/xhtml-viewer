@@ -3,7 +3,6 @@ package de.olivervier.xhtml_viewer.reader;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,6 +45,7 @@ public class XHTMLReader {
 				final String fileName = file.getName();
 				NodeList compositions = doc.getElementsByTagName("ui:composition");
 				NodeList parameters = doc.getElementsByTagName("ui:param");
+				NodeList includes = doc.getElementsByTagName("ui:include");
 				
 				Page currentPage = pages.get(fileName);
 				
@@ -80,6 +80,25 @@ public class XHTMLReader {
 					currentPage.getParameters().add(new Param(nameNode.getNodeValue(), valueNode.getNodeValue()));
 				}
 				
+				//Look for ui:includes, add relation in foreignPage to currentPage
+				for(int i = 0; i < includes.getLength(); i++) {
+					NamedNodeMap includeAttributes = includes.item(i).getAttributes();
+					if(includeAttributes == null) {
+						continue;
+					}
+					Node srcAttribute = includeAttributes.getNamedItem("src");
+					if(srcAttribute == null) {
+						continue;
+					}
+					String srcValue = srcAttribute.getNodeValue();
+					if(pages.containsKey(srcValue)) {
+						Page foreignPage = pages.get(srcValue);
+						if(foreignPage == null) {
+							continue;
+						}
+						foreignPage.getRelations().add(currentPage);
+					}
+				}
 			} catch (ParserConfigurationException | SAXException | IOException e) {
 				e.printStackTrace();
 			}
