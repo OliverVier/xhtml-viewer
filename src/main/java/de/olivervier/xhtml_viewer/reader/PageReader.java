@@ -13,18 +13,31 @@ public class PageReader {
 	 */
 	public List<File> filterPages(String ...dirPath) {
 		
-		if(dirPath == null) {
-			System.err.println("No paths given");
-			return null;
+		if(dirPath == null || dirPath.length == 0) {
+			throw new IllegalArgumentException("No directories given. Check filepath/s!");
 		}
 		
 		List<File> directories = new ArrayList<>();
 		for(String fp : dirPath) {
-			directories.add(new File(fp));
+			File dir = new File(fp);
+			if(dir.exists()) {
+				directories.add(new File(fp));
+			}
+			else {				
+				System.err.println("Filepath " + dir + " does not exist!");
+			}			
+		}
+		
+		//return null, if no filepath is found
+		if(directories.isEmpty()) {
+			throw new IllegalArgumentException("No directories with given filepaths found!");
 		}
 
 		List<File> files = new ArrayList<File>();
-		for(File dir : directories) {			
+		for(File dir : directories) {
+			if(dir.listFiles()==null) {
+				continue;
+			}
 			for(File file : dir.listFiles()) {
 				if(file.getName().lastIndexOf(".xhtml") != -1) {				
 					files.add(file);
