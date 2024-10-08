@@ -6,12 +6,16 @@ import java.util.List;
 
 public class PageReader {
 
+	public List<File> filterPages(String[] dirPath, boolean recursively) {
+		return recursively ? filterPagesRecursive(dirPath) : filterPagesNormal(dirPath);
+	}
+
 	/**
 	 * Reads in xhtml pages in the given directory paths
 	 * @param dirPath absolute directory paths
 	 * @return list of xhtml files as List<File>
 	 */
-	public List<File> filterPages(String ...dirPath) {
+	public List<File> filterPagesNormal(String ...dirPath) {
 		
 		if(dirPath == null || dirPath.length == 0) {
 			throw new IllegalArgumentException("No directories given. Check filepath/s!");

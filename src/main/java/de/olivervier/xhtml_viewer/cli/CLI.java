@@ -19,11 +19,10 @@ public class CLI {
 	public CLI() {
 	}
 
-	public void run(String[] filepaths, boolean recursive) {
+	public void run(String[] filepaths, boolean recursively) {
 
-		// TODO: recursive file lookup
 		scanner = new Scanner(System.in);
-		pages = loadPages(filepaths);
+		pages = loadPages(filepaths, recursively);
 
 		printHelp();
 
@@ -116,8 +115,8 @@ public class CLI {
 		}
 	}
 
-	private List<Page> loadPages(String... dirPaths) {
-		List<File> files = new PageReader().filterPages(dirPaths);
+	private List<Page> loadPages(String[] dirPaths, boolean recursively) {
+		List<File> files = new PageReader().filterPages(dirPaths, recursively);
 		return new XHTMLReader().readPages(files);
 	}
 
