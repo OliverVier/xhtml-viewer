@@ -1,11 +1,10 @@
 package de.olivervier.xhtml_viewer.cli;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
-import de.olivervier.xhtml_viewer.model.Page;
-
-//vhtmlv [filepath] -r=RECURSIVE
+//vhtmlv [filepath] -r  //recursive
+//vhtmlv set page
 //vhtmlv -p 			//get every parameter
 //vhtmlv -r 			//get every relation
 //vhtmlv -f 			//get every reference for the page
@@ -14,19 +13,18 @@ import de.olivervier.xhtml_viewer.model.Page;
 
 public class Command {
 
-	private Page context;
 	private String action;
-	private CommandParam[] params;
+	private Set<CommandParam> params;
 
-	public Command(String userInput, Page context) {
+	public Command(String userInput) {
 		try {
-			createCommand(userInput, context);
+			createCommand(userInput);
 		} catch (IllegalArgumentException e) {
 			e.printStackTrace();
 		}
 	}
 
-	private void createCommand(String userInput, Page context) throws IllegalArgumentException {
+	private void createCommand(String userInput) throws IllegalArgumentException {
 
 		if (userInput == null || userInput.isBlank()) {
 			throw new IllegalArgumentException("No user input for command!");
@@ -37,47 +35,24 @@ public class Command {
 			throw new IllegalArgumentException("No command");
 		}
 
-		// set -p -p -p
-		// " "
-		// set name
-
-		// action word or parameter/s
 		if (splitUserInput.length == 1) {
-
-			String action = splitUserInput[0];
-
-			if (isParameter(action)) {
-
-				if (action.length() - 1 > CommandParam.values().length) {
-					throw new IllegalArgumentException("Too many parameters");
-				}
-
-				if (action.charAt(0) == '-') {
-
-					action = action.substring(1, action.length());
-					List<CommandParam> params = new ArrayList<CommandParam>();
-					for (char c : action.toCharArray()) {
-
-						CommandParam param = findParam(c);
-
-						if (param == null) {
-							System.err.println("Parameter " + c + "does not exist");
-							continue;
-						}
-						
-						params.add(param);
-					}
-
-				}
-
-				String keyword = splitUserInput[0];
-
-			} else {
-
-			}
-
+			
 		}
 
+		if (splitUserInput.length == 2) {
+
+			if (isParameter(splitUserInput[0])) {
+				throw new IllegalArgumentException(
+						"Parameters are not allowed at first position, when another keyword is included");
+			}
+
+			action = splitUserInput[0];
+			this.params = extractCommandParams(splitUserInput[1]);
+		}
+
+		if(splitUserInput.length > 2) {
+			throw new IllegalArgumentException("Wrong command format. Look at 'command -h' for help");
+		}
 	}
 
 	/**
@@ -86,36 +61,45 @@ public class Command {
 	 * @param parameterString
 	 * @return list of parameters
 	 */
-	private List<CommandParam> extractCommandParams(String parameterString) {
-		return null;
-	}
+	private Set<CommandParam> extractCommandParams(String useString) throws IllegalArgumentException {
 
-	/**
-	 * Is the given string a parameter?
-	 * 
-	 * @return
-	 */
-	private boolean isParameter(String input) {
+		Set<CommandParam> commandParameters = new HashSet<>();
 
-		if (input == null) {
-			return false;
+		useString = useString.trim();
+
+		if(useString.charAt(0)=='-') {
+			useString = useString.substring(1,useString.length());
 		}
-
-		input = input.strip();
-		if (input.charAt(0) == '-') {
-			return true;
-		}
-
-		return false;
-	}
-
-
-	private CommandParam findParam(char param) {
-		for (CommandParam possibleParam : CommandParam.values()) {
-			if (possibleParam.asChar() == param) {
-				return possibleParam;
+		
+		for (char parameter : useString.toCharArray()) {
+			CommandParam param = CommandParam.charAsCommandParam(parameter);
+			if (param == null) {
+				throw new IllegalArgumentException("Invalid parameter: " + parameter);
 			}
+			commandParameters.add(param);
 		}
-		return null;
+
+		return commandParameters;
+	}
+
+	private boolean isParameter(String useString) {
+		return useString.trim().charAt(0) == '-';
+	}
+
+	public String getAction() {
+		return action;
+	}
+
+	public Set<CommandParam> getParams() {
+		return params;
+	}
+
+	public static void main(String[] args) {
+		Command command = new Command("test-test");
+		System.out.println(command.action);
+
+		for(CommandParam param : command.params) {
+			System.out.println(param);
+		}
 	}
 }
