@@ -12,18 +12,24 @@ import de.olivervier.xhtml_viewer.reader.XHTMLReader;
 public class CLI {
 
 	private Scanner scanner;
-
-	// Current page to look at
 	private Page context;
 	private List<Page> pages;
 
-	public CLI() {
+	public CLI() {}
+	
+	public void run(String[] filepaths, boolean recursive) {
+		
+		//TODO: recursive file lookup
 		scanner = new Scanner(System.in);
-	}
+		pages = search(filepaths);
 
-	public void run() {
+		printHelp();
+
 		while (true) {
-			String userInput = scanner.next();
+
+			print();
+
+			String userInput = scanner.nextLine();
 			String[] splitUserInput = userInput.split(" ");
 
 			// if(splitUserInput[0].eq)
@@ -32,7 +38,12 @@ public class CLI {
 		}
 	}
 
-	public void print() {
+	private List<Page> search(String... dirPaths) {
+		List<File> files = new PageReader().filterPages(dirPaths);
+		return new XHTMLReader().readPages(files);
+	}
+	
+	public void printPage() {
 
 		for (Page page : pages) {
 
@@ -61,8 +72,22 @@ public class CLI {
 
 	}
 
-	private List<Page> search(String... dirPaths) {
-		List<File> files = new PageReader().filterPages(dirPaths);
-		return new XHTMLReader().readPages(files);
+	public void print() {
+		String contextName = context == null ? "" : context.getName();
+		System.out.print("#"+contextName+"   ");
+	}
+
+	public void printHelp() {
+		System.out.println(
+			"\nxhtml viewer started. Possible options:"+
+			"\n-----------------"+
+			"\nset PAGE_NAME"+
+			"\n-p | get every parameter"+
+			"\n-r | get every relation"+ 
+			"\n-f | get every reference"+
+			"\n-l | include filename and line"+
+			"\n-h | get help"+
+			"\n"
+		);
 	}
 }
