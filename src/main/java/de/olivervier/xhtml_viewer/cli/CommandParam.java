@@ -8,7 +8,8 @@ public enum CommandParam {
 	REC('R'), 
 	REL('r'), 
 	REF('f'), 
-	HELP('h');
+	HELP('h'),
+	LISTALL('L');
 
 	private char character;
 

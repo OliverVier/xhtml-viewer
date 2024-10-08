@@ -17,11 +17,7 @@ public class Command {
 	private Set<CommandParam> params;
 
 	public Command(String userInput) {
-		try {
-			createCommand(userInput);
-		} catch (IllegalArgumentException e) {
-			e.printStackTrace();
-		}
+		createCommand(userInput);
 	}
 
 	private void createCommand(String userInput) throws IllegalArgumentException {
@@ -36,7 +32,13 @@ public class Command {
 		}
 
 		if (splitUserInput.length == 1) {
-			
+			userInput = splitUserInput[0];
+			if(isParameter(userInput)) {
+				action = null;
+				params = extractCommandParams(userInput);
+			} else {
+				throw new IllegalArgumentException("Unexpected keyword without specifier");
+			}
 		}
 
 		if (splitUserInput.length == 2) {
@@ -47,7 +49,13 @@ public class Command {
 			}
 
 			action = splitUserInput[0];
-			this.params = extractCommandParams(splitUserInput[1]);
+
+			if(isParameter(splitUserInput[1])) {
+				this.params = extractCommandParams(splitUserInput[1]);
+			} else {
+				action = action.trim();
+				action += " "+splitUserInput[1];
+			}
 		}
 
 		if(splitUserInput.length > 2) {

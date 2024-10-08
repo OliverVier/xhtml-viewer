@@ -4,7 +4,7 @@ public class Main {
 	public static void main(String[] args) {
 
 		//Just for testing
-		args = new String[]{"src", "true"};
+		args = new String[]{"/home/test-oli/eclipse-workspace/xhtml-viewer-test-webapp/src/main/webapp", "true"};
 
 		String[] filepaths = new String[args.length - 1];
 		for(int i = 0; i < args.length-1; i++) {
