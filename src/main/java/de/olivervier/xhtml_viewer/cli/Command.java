@@ -101,13 +101,4 @@ public class Command {
 	public Set<CommandParam> getParams() {
 		return params;
 	}
-
-	public static void main(String[] args) {
-		Command command = new Command("test-test");
-		System.out.println(command.action);
-
-		for(CommandParam param : command.params) {
-			System.out.println(param);
-		}
-	}
 }
