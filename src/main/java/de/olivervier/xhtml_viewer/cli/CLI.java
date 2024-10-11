@@ -28,88 +28,83 @@ public class CLI {
 
 		while (true) {
 
-			print();
+			printContext();
 
 			String userInput = scanner.nextLine();
 
-			Command cmd = null;
+			CommandImpl cmd = null;
 			try {
-				cmd = new Command(userInput);
+				cmd = new CommandImpl(userInput);
 			} catch (IllegalArgumentException e) {
 				System.out.println(e.getMessage());
 				continue;
 			}
 
 			if (context == null) {
+				executeInNoContext(cmd);
+			} else {
+				executeInContext(cmd);
+			}
+		}
+	}
 
-				if (cmd.getAction() != null) {
-					String splitContext[];
-					if ((splitContext = cmd.getAction().split(" ")).length == 2) {
-						if (splitContext[0].equals("set")) {
-							Page page = searchForPage(splitContext[1]);
-							if(page == null) {
-								System.out.println("Page not found!");
-							} else {
-								context = page;
-							}
-						} else {
-							System.out.println("Unexpected input!");
-						}
-					} else {
-						System.out.println("Unexpected input!");
-					}
+	public void executeInNoContext(CommandImpl cmd) {
+		if (cmd.getAction() == Command.SET) {
+			if (cmd.getActionValue() != null) {
+				Page page = searchForPage(cmd.getActionValue());
+				if (page == null) {
+					System.out.println("Page not found!");
 				} else {
-					if (cmd.getParams() != null) {
-						for (CommandParam param : cmd.getParams()) {
-							switch (param) {
-								case CommandParam.HELP:
-									printHelp();
-									break;
-								case CommandParam.LISTALL:
-									printAllPageNames();
-									break;
-								default:
-									System.out.println("Parameter " + param + "used in wrong context");
-									break;
-							}
-						}
+					context = page;
+				}
+			} else {
+				System.out.println("Unexpected input!");
+			}
+		} else {
+			if (cmd.getParams() != null) {
+				for (CommandParam param : cmd.getParams()) {
+					switch (param) {
+						case CommandParam.HELP:
+							printHelp();
+							break;
+						case CommandParam.LISTALL:
+							printAllPageNames();
+							break;
+						default:
+							System.out.println("Parameter " + param + " not available in context");
+							break;
 					}
 				}
+			}
+		}
+	}
 
-			} else { // context is set
-
-				String splitContext[];
-				if (cmd.getAction() != null) {
-					if ((splitContext = cmd.getAction().split(" ")).length == 2) {
-						if (splitContext[0].equals("set")) {
-							Page page = searchForPage(splitContext[1]);
-							if(page == null) {
-								System.out.println("Page not found!");
-							} else {
-								context = page;
-							}
-						} else {
-							System.out.println("Unexpected input!");
-						}
-					} else {
-						System.out.println("Unexpected input!");
-					}
+	public void executeInContext(CommandImpl cmd) {
+		if (cmd.getAction() == Command.SET) {
+			if (cmd.getActionValue() != null) {
+				Page page = searchForPage(cmd.getActionValue());
+				if (page == null) {
+					System.out.println("Page not found!");
+				} else {
+					context = page;
 				}
+			} else {
+				System.out.println("Unexpected input!");
+			}
+		}
 
-				if (cmd.getAction() == null) {
-					for (CommandParam commandParam : cmd.getParams()) {
-						switch (commandParam) {
-							case CommandParam.HELP:
-								printHelp();
-								break;
-							case CommandParam.LISTALL:
-								printAllPageNames();
-								break;
-							default:
-								System.out.println("Not implemented");
-								break;
-						}
-					}
+		if (cmd.getAction() == null) {
+			for (CommandParam commandParam : cmd.getParams()) {
+				switch (commandParam) {
+					case CommandParam.HELP:
+						printHelp();
+						break;
+					case CommandParam.LISTALL:
+						printAllPageNames();
+						break;
+					default:
+						System.out.println("Not implemented");
+						break;
 				}
 			}
 		}
@@ -164,7 +159,7 @@ public class CLI {
 
 	}
 
-	public void print() {
+	public void printContext() {
 		String contextName = context == null ? "" : context.getName();
 		System.out.print("#" + contextName + "   ");
 	}
