@@ -169,10 +169,12 @@ public class CLI {
 				"\nxhtml viewer started. Possible options:" +
 						"\n-----------------" +
 						"\nset PAGE_NAME" +
+						"\nonly usable when page is set:" +
 						"\n-p | get every parameter" +
 						"\n-r | get every relation" +
 						"\n-f | get every reference" +
 						"\n-l | include filename and line" +
+						"\n-----------------" +
 						"\n-h | get help" +
 						"\n-L | list all xhtml pages" +
 						"\n");
