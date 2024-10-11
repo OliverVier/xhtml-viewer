@@ -6,7 +6,7 @@ import java.util.List;
 
 public class PageReader {
 
-	public List<File> filterPages(String[] dirPath, boolean recursively) {
+	public List<File> filterPages(String[] dirPath, boolean recursively) throws IllegalArgumentException{
 		return recursively ? filterPagesRecursive(dirPath) : filterPagesNormal(dirPath);
 	}
 
@@ -15,7 +15,7 @@ public class PageReader {
 	 * @param dirPath absolute directory paths
 	 * @return list of xhtml files as List<File>
 	 */
-	public List<File> filterPagesNormal(String ...dirPath) {
+	public List<File> filterPagesNormal(String ...dirPath) throws IllegalArgumentException {
 		
 		if(dirPath == null || dirPath.length == 0) {
 			throw new IllegalArgumentException("No directories given. Check filepath/s!");
@@ -24,6 +24,10 @@ public class PageReader {
 		List<File> directories = new ArrayList<>();
 		for(String fp : dirPath) {
 			File dir = new File(fp);
+			if(!dir.isDirectory()) {
+				throw new IllegalArgumentException("File is not a directory");
+			}
+
 			if(dir.exists()) {
 				directories.add(new File(fp));
 			}
@@ -58,7 +62,7 @@ public class PageReader {
 	 * @param dirPath absolute directory paths
 	 * @return list of xhtml files as List<File>
 	 */
-	public List<File> filterPagesRecursive(String ...dirPath) {
+	public List<File> filterPagesRecursive(String ...dirPath) throws IllegalArgumentException {
 		if(dirPath == null) {
 			System.err.println("No paths given");
 			return null;
@@ -66,6 +70,9 @@ public class PageReader {
 		
 		List<File> directories = new ArrayList<>();
 		for(String fp : dirPath) {
+			if(!new File(fp).isDirectory()) {
+				throw new IllegalArgumentException("Path at " + fp + " is not a directory!");
+			}
 			directories.addAll(readDirectoriesRec(fp));
 		}
 
@@ -85,7 +92,7 @@ public class PageReader {
 	 * @param dirPath
 	 * @return list of directories as List<File>
 	 */
-	private List<File> readDirectoriesRec(String dirPath) {
+	private List<File> readDirectoriesRec(String dirPath) {		
 		List<File> dirs = new ArrayList<>();
 		dirs.add(new File(dirPath));
 		for(File file : new File(dirPath).listFiles()) {
