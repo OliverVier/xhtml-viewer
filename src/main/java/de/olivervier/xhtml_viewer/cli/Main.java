@@ -9,13 +9,18 @@ public class Main {
 
 		//Just for testing
 		//"/home/test-oli/eclipse-workspace/xhtml-viewer-test-webapp/src/main/webapp/test
-		args = new String[]{"/home/test-oli/eclipse-workspace/xhtml-viewer-test-webapp/src/main/webapp", "/home/test-oli/eclipse-workspace/xhtml-viewer-test-webapp/src/main/webapp/test"};
+		args = new String[]{"/home/test-oli/eclipse-workspace/xhtml-viewer-test-webapp/src/main/webapp"};
 		
 		boolean recursive = args[args.length-1].equals("-r");
 		List<String> filepaths = new ArrayList<>();
 
 		File file = new File(args[args.length-1]);
-		int lastFilepathIndex = recursive == false && file.isDirectory() ? args.length: args.length -1;
+		if(recursive==false && !file.isDirectory()) {
+			System.err.println("Path at " + args[args.length-1] + " is not a directory");
+			return;
+		}
+
+		int lastFilepathIndex = recursive == false ? args.length: args.length -1;
 
 		for(int i = 0; i < lastFilepathIndex; i++) {
 			filepaths.add(args[i]);
