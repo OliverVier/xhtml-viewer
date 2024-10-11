@@ -26,7 +26,7 @@ public class CommandImpl {
 
 		if (splitUserInput.length == 1) {
 			userInput = splitUserInput[0];
-			if(isParameter(userInput)) {
+			if (isParameter(userInput)) {
 				action = null;
 				params = extractCommandParams(userInput);
 			} else {
@@ -36,25 +36,28 @@ public class CommandImpl {
 
 		if (splitUserInput.length == 2) {
 
-			if (isParameter(splitUserInput[0])) {
+			String commandAction = splitUserInput[0];
+			String commandActionValue = splitUserInput[1];
+
+			if (isParameter(commandAction)) {
 				throw new IllegalArgumentException(
 						"Parameters are not allowed at first position, when another keyword is included");
 			}
 
 			Command command;
-			if((command = Command.stringAsCommand(splitUserInput[0]))==null) {
-				throw new IllegalArgumentException("Command " + splitUserInput[0] + " does not exist");
+			if ((command = Command.stringAsCommand(commandAction)) == null) {
+				throw new IllegalArgumentException("Command " + commandAction + " does not exist");
 			}
 			action = command;
 
-			if(isParameter(splitUserInput[1])) {
-				this.params = extractCommandParams(splitUserInput[1]);
+			if (isParameter(commandActionValue)) {
+				this.params = extractCommandParams(commandActionValue);
 			} else {
-				actionValue = splitUserInput[1].trim();
+				actionValue = commandActionValue.trim();
 			}
 		}
 
-		if(splitUserInput.length > 2) {
+		if (splitUserInput.length > 2) {
 			throw new IllegalArgumentException("Wrong command format. Look at 'command -h' for help");
 		}
 	}
@@ -71,10 +74,10 @@ public class CommandImpl {
 
 		useString = useString.trim();
 
-		if(useString.charAt(0)=='-') {
-			useString = useString.substring(1,useString.length());
+		if (useString.charAt(0) == '-') {
+			useString = useString.substring(1, useString.length());
 		}
-		
+
 		for (char parameter : useString.toCharArray()) {
 			CommandParam param = CommandParam.charAsCommandParam(parameter);
 			if (param == null) {
@@ -100,5 +103,5 @@ public class CommandImpl {
 
 	public Set<CommandParam> getParams() {
 		return params;
-	}	
+	}
 }
