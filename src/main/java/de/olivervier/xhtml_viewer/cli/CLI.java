@@ -3,7 +3,6 @@ package de.olivervier.xhtml_viewer.cli;
 import java.io.File;
 import java.util.List;
 import java.util.Scanner;
-import java.util.Set;
 
 import de.olivervier.xhtml_viewer.model.Page;
 import de.olivervier.xhtml_viewer.model.Param;
@@ -49,64 +48,84 @@ public class CLI {
 	}
 
 	public void executeInNoContext(CommandImpl cmd) {
-		if (cmd.getAction() == Command.SET) {
-			if (cmd.getActionValue() != null) {
-				Page page = searchForPage(cmd.getActionValue());
-				if (page == null) {
-					System.out.println("Page not found!");
-				} else {
-					context = page;
-				}
-			} else {
-				System.out.println("Unexpected input!");
-			}
-		} else {
-			if (cmd.getParams() != null) {
-				for (CommandParam param : cmd.getParams()) {
-					switch (param) {
-						case CommandParam.HELP:
-							printHelp();
-							break;
-						case CommandParam.LISTALL:
-							printAllPageNames();
-							break;
-						default:
-							System.out.println("Parameter " + param + " not available in context");
-							break;
+
+		if (cmd.getAction() != null) {
+			switch (cmd.getAction()) {
+				case SET:
+					Page page = searchForPage(cmd.getActionValue());
+					if (page == null) {
+						System.out.println("Page not found!");
+					} else {
+						context = page;
 					}
+					break;
+				default:
+					break;
+			}
+		}
+
+		if (cmd.getParams() != null) {
+			for (CommandParam param : cmd.getParams()) {
+				switch (param) {
+					case HELP:
+						printHelp();
+						break;
+					case LISTALL:
+						printAllPageNames();
+						break;
+					default:
+						System.out.println("Parameter " + param + " not available in context");
+						break;
 				}
 			}
 		}
 	}
 
 	public void executeInContext(CommandImpl cmd) {
-		if (cmd.getAction() == Command.SET) {
-			if (cmd.getActionValue() != null) {
-				Page page = searchForPage(cmd.getActionValue());
-				if (page == null) {
-					System.out.println("Page not found!");
-				} else {
-					context = page;
-				}
-			} else {
-				System.out.println("Unexpected input!");
+
+		if (cmd.getAction() != null) {
+			switch (cmd.getAction()) {
+				case SET:
+					Page page = searchForPage(cmd.getActionValue());
+					if (page == null) {
+						System.out.println("Page not found!");
+					} else {
+						context = page;
+					}
+					break;
+				default:
+					break;
 			}
 		}
 
-		if (cmd.getAction() == null) {
+		if (cmd.getParams() != null) {
+			PagePrinter printer = new PagePrinter(pages, context);
 			for (CommandParam commandParam : cmd.getParams()) {
 				switch (commandParam) {
-					case CommandParam.HELP:
+					case HELP:
 						printHelp();
 						break;
-					case CommandParam.LISTALL:
+					case LISTALL:
 						printAllPageNames();
+						break;
+					case PARAM:
+						printer.showParameters();
+						break;
+					case REC:
+						break;
+					case REF:
+						printer.showReferences();
+						break;
+					case REL:
+						printer.showRelations();
 						break;
 					default:
 						System.out.println("Not implemented");
 						break;
 				}
 			}
+			System.out.println("");
+			printer.print();
 		}
 	}
 
@@ -156,7 +175,6 @@ public class CLI {
 			}
 			System.out.println();
 		}
-
 	}
 
 	public void printContext() {
