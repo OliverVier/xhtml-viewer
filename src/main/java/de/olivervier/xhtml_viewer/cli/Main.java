@@ -1,36 +1,30 @@
 package de.olivervier.xhtml_viewer.cli;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-
 public class Main {
 	public static void main(String[] args) {
+
+		//basepath
+		//basepath ...relative_path
 
 		//Just for testing
 		//"/home/test-oli/eclipse-workspace/xhtml-viewer-test-webapp/src/main/webapp/test
 		args = new String[]{"/home/test-oli/eclipse-workspace/xhtml-viewer-test-webapp/src/main/webapp"};
 		
-		boolean recursive = args[args.length-1].equals("-r");
-		List<String> filepaths = new ArrayList<>();
-
-		File file = new File(args[args.length-1]);
-		if(recursive==false && !file.isDirectory()) {
-			System.err.println("Path at " + args[args.length-1] + " is not a directory");
-			return;
+		String basepath = args[0];
+		String[] filepaths = new String[args.length-1];
+		
+		if(filepaths.length == 0) {
+			filepaths = new String[]{""};
+		} else {
+			for(int i = 0; i < filepaths.length; i++) {
+				filepaths[i] = args[i+1];
+			}
 		}
 
-		int lastFilepathIndex = recursive == false ? args.length: args.length -1;
-
-		for(int i = 0; i < lastFilepathIndex; i++) {
-			filepaths.add(args[i]);
+		try {
+			new CLI().run(basepath, filepaths);
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
 		}
-
-		String[] filepathArray = new String[filepaths.size()];
-		for(int i = 0; i < filepaths.size(); i++) {
-			filepathArray[i] = filepaths.get(i);
-		}
-
-		new CLI().run(filepathArray, recursive);
 	}
 }

@@ -18,10 +18,10 @@ public class CLI {
 	public CLI() {
 	}
 
-	public void run(String[] filepaths, boolean recursively) {
+	public void run(String basepath, String[] filepaths) {
 
 		scanner = new Scanner(System.in);
-		pages = loadPages(filepaths, recursively);
+		pages = loadPages(basepath, filepaths);
 
 		printHelp();
 
@@ -129,9 +129,9 @@ public class CLI {
 		}
 	}
 
-	private List<Page> loadPages(String[] dirPaths, boolean recursively) {
-		List<File> files = new PageReader().filterPages(dirPaths, recursively);
-		return new XHTMLReader().readPages(files);
+	private List<Page> loadPages(String basepath, String[] dirPaths) {
+		List<File> files = new PageReader().filterPages(basepath, dirPaths);
+		return new XHTMLReader().readPages(basepath, files);
 	}
 
 	private Page searchForPage(String pageName) {

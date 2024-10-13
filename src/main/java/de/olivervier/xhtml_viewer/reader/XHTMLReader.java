@@ -2,6 +2,7 @@ package de.olivervier.xhtml_viewer.reader;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,16 +28,33 @@ public class XHTMLReader {
 	 * @param files pages as xhtml to be read
 	 * @return list of xhtml pages as Page objects
 	 */
-	public List<Page> readPages(List<File> files) {
+	public List<Page> readPages(String basepath, List<File> files) {
 		
+		if(basepath == null) {
+			throw new IllegalArgumentException("basepath cannot be null!");
+		}
+
 		if(files == null) {
 			throw new IllegalArgumentException("parameter 'files' must not be null!");
 		}
-
+		
+		//Get path in OS style
+		basepath = new File(basepath).getPath();
+		
 		//Prefill
 		Map<String, Page> pages = new HashMap<>();
-		files.forEach(f -> pages.put(f.getName(), new Page(f.getName(),new ArrayList<>(),new ArrayList<>())));
+		for(File currentFile : files) {
+			String relativePathName = null;
+			
+			if(!currentFile.getPath().contains(basepath)) {
+				throw new IllegalArgumentException();
+			} else {
+				relativePathName = currentFile.getPath().replace(basepath, "");
+			}
 
+			pages.put(relativePathName, new Page(relativePathName,new ArrayList<>(),new ArrayList<>()));
+		}
+		
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		for(File file : files) {			
 			try {
@@ -46,11 +64,16 @@ public class XHTMLReader {
 				//dbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
 				doc.getDocumentElement().normalize();
 
-				Page currentPage = pages.get(file.getName());
+				if(file.getName().equals("AnzeigeFortbildungsstand.xhtml")) {
+					System.out.println();
+				}
+
+				String relativePathName = file.getPath().replace(basepath, "");
+				Page currentPage = pages.get(relativePathName);
 				
-				currentPage.getRelations().addAll(findCompositions(doc, pages));
+				currentPage.getRelations().addAll(findCompositions(doc, basepath, pages));
 				currentPage.getParameters().addAll(findParameters(doc));
-				findIncludes(doc, pages).forEach(foreignPage -> foreignPage.getRelations().add(currentPage));
+				findIncludes(doc, basepath, pages).forEach(foreignPage -> foreignPage.getRelations().add(currentPage));
 
 			} catch (ParserConfigurationException | SAXException | IOException e) {
 				e.printStackTrace();
@@ -68,7 +91,7 @@ public class XHTMLReader {
 	 * @param pages Map containing all possible xhtml pages of type {@link Page}
 	 * @return list of compositions matching name in pages-map
 	 */
-	public List<Page> findCompositions(Document doc, Map<String, Page> pages) {
+	public List<Page> findCompositions(Document doc, String basepath, Map<String, Page> pages) {
 		NodeList compositions = doc.getElementsByTagName("ui:composition");
 		List<Page> relations = new ArrayList<>();
 		
@@ -83,8 +106,19 @@ public class XHTMLReader {
 				continue;
 			}
 			String templateName = templateAttribute.getNodeValue();
-			if(pages.containsKey(templateName)) {
-				Page templatePage = pages.get(templateName);
+			
+			File file = new File(Paths.get(basepath,templateName).toString());
+			if(!file.exists()) {
+				throw new IllegalArgumentException("Composition file does not exist!");
+			}
+
+			String relativeFilePath = file.getPath().replace(basepath, "");
+			
+			if(pages.containsKey(relativeFilePath)) {
+				Page templatePage = pages.get(relativeFilePath);
+				if(templatePage==null) {
+					continue;
+				}
 				relations.add(templatePage);
 			}
 		}
@@ -126,7 +160,7 @@ public class XHTMLReader {
 	 * @param pages Map containing all possible xhtml pages of type {@link Page}
 	 * @return list of xhtml pages as type {@link Param} in xhtml document
 	 */
-	public List<Page> findIncludes(Document doc, Map<String, Page> pages) {
+	public List<Page> findIncludes(Document doc, String basepath, Map<String, Page> pages) {
 		
 		NodeList includeNodes = doc.getElementsByTagName("ui:include");
 		List<Page> relations = new ArrayList<>();
@@ -142,8 +176,16 @@ public class XHTMLReader {
 				continue;
 			}
 			String srcValue = srcAttribute.getNodeValue();
-			if(pages.containsKey(srcValue)) {
-				Page foreignPage = pages.get(srcValue);
+
+			File file = new File(Paths.get(basepath,srcValue).toString());
+			if(!file.exists()) {
+				throw new IllegalArgumentException("Include file does not exist!");
+			}
+
+			String relativeFilePath = file.getPath().replace(basepath, "");
+
+			if(pages.containsKey(relativeFilePath)) {
+				Page foreignPage = pages.get(relativeFilePath);
 				if(foreignPage == null) {
 					continue;
 				}
