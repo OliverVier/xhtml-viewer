@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.olivervier.xhtml_viewer.util.FileUtil;
+
 public class PageReader {
 
 	/**
@@ -54,7 +56,8 @@ public class PageReader {
 				continue;
 			}
 			for(File file : dir.listFiles()) {
-				if(file.getName().lastIndexOf(".xhtml") != -1) {				
+				String fileExtension = FileUtil.getFileExtension(file);
+				if(fileExtension != null && FileUtil.getFileExtension(file).equals(".xhtml")) {				
 					files.add(file);
 				}
 			}

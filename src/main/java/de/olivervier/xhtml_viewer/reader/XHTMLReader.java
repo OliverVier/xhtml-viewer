@@ -20,6 +20,7 @@ import org.xml.sax.SAXException;
 
 import de.olivervier.xhtml_viewer.model.Page;
 import de.olivervier.xhtml_viewer.model.Param;
+import de.olivervier.xhtml_viewer.util.FileUtil;
 
 public class XHTMLReader {
 	
@@ -38,8 +39,7 @@ public class XHTMLReader {
 			throw new IllegalArgumentException("parameter 'files' must not be null!");
 		}
 		
-		//Get path in OS style
-		basepath = new File(basepath).getPath();
+		basepath = FileUtil.getFilePath(basepath);
 		
 		//Prefill
 		Map<String, Page> pages = new HashMap<>();
@@ -49,9 +49,9 @@ public class XHTMLReader {
 			if(!currentFile.getPath().contains(basepath)) {
 				throw new IllegalArgumentException();
 			} else {
-				relativePathName = currentFile.getPath().replace(basepath, "");
+				relativePathName = FileUtil.getRelativePath(basepath, currentFile.getPath());
 			}
-
+			
 			pages.put(relativePathName, new Page(relativePathName,new ArrayList<>(),new ArrayList<>()));
 		}
 		
@@ -63,12 +63,8 @@ public class XHTMLReader {
 				
 				//dbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
 				doc.getDocumentElement().normalize();
-
-				if(file.getName().equals("AnzeigeFortbildungsstand.xhtml")) {
-					System.out.println();
-				}
-
-				String relativePathName = file.getPath().replace(basepath, "");
+				
+				String relativePathName = FileUtil.getRelativePath(basepath, file.getPath());
 				Page currentPage = pages.get(relativePathName);
 				
 				currentPage.getRelations().addAll(findCompositions(doc, basepath, pages));
@@ -82,7 +78,6 @@ public class XHTMLReader {
 
 		return pages.values().stream().toList();
 	}
-	
 	
 	/**
 	 * Looks for ui:composition tags in the given xml structure. Returns composition names
@@ -111,8 +106,8 @@ public class XHTMLReader {
 			if(!file.exists()) {
 				throw new IllegalArgumentException("Composition file does not exist!");
 			}
-
-			String relativeFilePath = file.getPath().replace(basepath, "");
+			
+			String relativeFilePath = FileUtil.getRelativePath(basepath, file.getPath());
 			
 			if(pages.containsKey(relativeFilePath)) {
 				Page templatePage = pages.get(relativeFilePath);
@@ -182,7 +177,7 @@ public class XHTMLReader {
 				throw new IllegalArgumentException("Include file does not exist!");
 			}
 
-			String relativeFilePath = file.getPath().replace(basepath, "");
+			String relativeFilePath = FileUtil.getRelativePath(basepath, file.getPath());
 
 			if(pages.containsKey(relativeFilePath)) {
 				Page foreignPage = pages.get(relativeFilePath);
@@ -194,16 +189,5 @@ public class XHTMLReader {
 		}
 		
 		return relations;
-	}
-	
-	/**
-	 * Get filename without extension
-	 * @param file
-	 * @return
-	 */
-	private String getFileName(String fileName) {
-		if(fileName==null) {return null;}
-		int pointIdx = fileName.lastIndexOf(".");
-		return pointIdx!=-1 ? fileName.substring(0,pointIdx) : fileName;
 	}
 }
