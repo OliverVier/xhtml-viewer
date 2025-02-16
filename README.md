@@ -7,13 +7,11 @@ amounts, compositions might be hindering the ability to quickly understand
 the page structure. For example, some parameters can be set in a parent 
 template, some others in several child templates, which a page then receives via the parent template.
 
-We have multiple templates with a single parameter named after the template.
+For example we might have multiple templates with a single parameter named after the template.
 |Type|Values|
 |----|------|
 |Templates|A.xhtml, B.xhtml, C.xhtml|
 |Actual page|page.xhtml|
-
-
 
 |Templates used by||
 |-|-|
@@ -21,8 +19,10 @@ We have multiple templates with a single parameter named after the template.
 | C.xhtml <-- B.xhtml | B uses C |
 | B.xhtml <-- page.xhtml | page uses B` |
 
-page.xhtml now has access to parameter A, B and C. You are fine, when every parameter is directly assignable to a page based on the naming scheme. The problem lies in that when you don't have that.
+page.xhtml now has access to parameter A, B and C. If your structure is slightly more complex
+and you have several parameters on different pages to keep track off, the complexity rises
+fast.
 
-I want to quickly have the information about which template is used by which page and which parameters are included in using the given template. This information is either given in pure textform or as a diagram (for example, see UML class-diagrams for Java).
+I want to quickly have the information about which template is used by which page and which parameters are included in using the given template. This information is given in pure textform or as a diagram (currently supports plantuml output)
 
 I might look into making a plugin for Eclipse.
