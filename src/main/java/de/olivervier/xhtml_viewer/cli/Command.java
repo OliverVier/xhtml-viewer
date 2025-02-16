@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public enum Command{
-	SET("set");
+	SET("set"),
+	EXPORT("export");
 
 	private String command;
 

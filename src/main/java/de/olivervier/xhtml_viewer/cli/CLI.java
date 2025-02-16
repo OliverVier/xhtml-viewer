@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.List;
 import java.util.Scanner;
 
+import de.olivervier.xhtml_viewer.diagram.DiagramExport;
 import de.olivervier.xhtml_viewer.model.Page;
 import de.olivervier.xhtml_viewer.model.Param;
 import de.olivervier.xhtml_viewer.reader.PageReader;
@@ -59,6 +60,8 @@ public class CLI {
 						context = page;
 					}
 					break;
+				case EXPORT:
+					new DiagramExport().handleExport(pages, cmd.getActionValue());
 				default:
 					break;
 			}
