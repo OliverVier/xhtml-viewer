@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.IllegalFormatException;
 import java.util.List;
 
@@ -16,12 +17,13 @@ public class DiagramExport {
     
     private final String[] DIAGRAM_OPTIONS       = {"set namespaceSeparator none", 
                                                     "skinparam linetype polyline", 
-                                                    "skinparam linetype ortho"};
+                                                    "skinparam linetype ortho",
+                                                    "top to bottom direction"};
     private final String START_DIAGRAM_FORMAT    = "@startuml %s";
     private final String END_DIAGRAM_FORMAT      = "@enduml";
     private final String OBJECT_NAME_FORMAT  = "object %s";
     private final String OBJECT_PARAMETER_FORMAT = "%s : %s";
-    private final String OBJECT_RELATION_FORMAT  = "%s -> %s";
+    private final String OBJECT_RELATION_FORMAT  = "%s ---> %s";
     private final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
 
     public void handleExport(List<Page> pages, String outputPath) {
@@ -30,6 +32,12 @@ public class DiagramExport {
         LocalDateTime localDateTime = LocalDateTime.now();
         String datetime = DATE_TIME_FORMATTER.format(localDateTime);
         String filename = "plantuml-"+datetime+".plantuml";
+
+        //Sort pages after name
+        ArrayList<Page> newPages = new ArrayList<Page>();
+        newPages.addAll(pages);
+        newPages.sort((o1, o2) -> o1.getName().compareTo(o2.getName()));
+        pages = newPages;
 
         //Start uml file, add options
         fileContent = addFormattedLine(fileContent, START_DIAGRAM_FORMAT, filename);
