@@ -107,9 +107,9 @@ public class DiagramExport {
         try (FileOutputStream stream = new FileOutputStream(newFile)) {
             stream.write(fileContent.getBytes());
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            System.err.println(String.format("Could not write file to %s. Details: %s", filePath, e.getMessage()));
         } catch (SecurityException e) {
-            System.err.println("Could not write file to " + filePath);
+            System.err.println(String.format("No permission to write file to %s.", filePath));
         } catch (IOException e) {
             e.printStackTrace();
         }
