@@ -42,7 +42,7 @@ public class XHTMLReader {
 		basepath = FileUtil.getFilePath(basepath);
 		
 		//Prefill
-		Map<String, Page> pages = new HashMap<>();
+		Map<String, Page> pagesMap = new HashMap<>();
 		for(File currentFile : files) {
 			String relativePathName = null;
 			
@@ -52,7 +52,7 @@ public class XHTMLReader {
 				relativePathName = FileUtil.getRelativePath(basepath, currentFile.getPath());
 			}
 			
-			pages.put(relativePathName, new Page(relativePathName,new ArrayList<>(),new ArrayList<>()));
+			pagesMap.put(relativePathName, new Page(relativePathName,new ArrayList<>(),new ArrayList<>()));
 		}
 		
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -65,18 +65,20 @@ public class XHTMLReader {
 				doc.getDocumentElement().normalize();
 				
 				String relativePathName = FileUtil.getRelativePath(basepath, file.getPath());
-				Page currentPage = pages.get(relativePathName);
+				Page currentPage = pagesMap.get(relativePathName);
 				
-				currentPage.getRelations().addAll(findCompositions(doc, basepath, pages));
+				currentPage.getRelations().addAll(findCompositions(doc, basepath, pagesMap));
 				currentPage.getParameters().addAll(findParameters(doc));
-				findIncludes(doc, basepath, pages).forEach(foreignPage -> foreignPage.getRelations().add(currentPage));
+				findIncludes(doc, basepath, pagesMap).forEach(foreignPage -> foreignPage.getRelations().add(currentPage));
 
 			} catch (ParserConfigurationException | SAXException | IOException e) {
 				e.printStackTrace();
 			}
 		}
 
-		return pages.values().stream().toList();
+		ArrayList<Page> pagesList = new ArrayList<>();
+		pagesList.addAll(pagesMap.values().stream().toList());
+		return pagesList;
 	}
 	
 	/**

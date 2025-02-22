@@ -9,6 +9,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.IllegalFormatException;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import de.olivervier.xhtml_viewer.model.Page;
 import de.olivervier.xhtml_viewer.model.Param;
@@ -26,18 +27,20 @@ public class DiagramExport {
     private final String OBJECT_RELATION_FORMAT  = "%s ---> %s";
     private final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
 
-    public void handleExport(List<Page> pages, String outputPath) {
+    public void handleExport(List<Page> pagesList, String outputPath, String includePattern) {
         String fileContent = "";
 
         LocalDateTime localDateTime = LocalDateTime.now();
         String datetime = DATE_TIME_FORMATTER.format(localDateTime);
         String filename = "plantuml-"+datetime+".plantuml";
 
-        //Sort pages after name
-        ArrayList<Page> newPages = new ArrayList<Page>();
-        newPages.addAll(pages);
-        newPages.sort((o1, o2) -> o1.getName().compareTo(o2.getName()));
-        pages = newPages;
+        List<Page> pages = pagesList; 
+
+        //Filter pages, then sort
+        if(!includePattern.equals(".")) {
+            pages = filterAfterPattern(pages, includePattern);
+        }
+        pages = sortAfterName(pages);
 
         //Start uml file, add options
         fileContent = addFormattedLine(fileContent, START_DIAGRAM_FORMAT, filename);
@@ -113,5 +116,83 @@ public class DiagramExport {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private List<Page> sortAfterName(List<Page> pages) {
+        ArrayList<Page> newPages = new ArrayList<Page>();
+        newPages.addAll(pages);
+        newPages.sort((o1, o2) -> o1.getName().compareTo(o2.getName()));
+        return newPages;
+    }
+
+    /**
+     * Filters pages only at the first level. All pages, that a page is related to, are still shown
+     * @param includePattern regex expression
+     * @return new filtered list with pages, including all their relationships without regard to
+     * the given pattern.
+     */
+    private List<Page> filterAfterPattern(List<Page> pagesList, String includePattern) {
+        
+        List<Page> pages = new ArrayList<>();
+        pages.addAll(pagesList);
+
+        List<Page> filteredList = new ArrayList<Page>();
+
+        Pattern pattern = Pattern.compile(includePattern);
+
+        //Filter at first level
+        for(Page page : pages) {
+            if(pattern.matcher(page.getName()).find()) {
+                filteredList.add(page);
+            }
+        }
+
+        //Include all pages having relationship to given page
+        for(Page page: pages) {
+            for(Page relpage : page.getRelations()) {
+                if (filteredList.contains(relpage)) {
+                    filteredList.add(page);
+                }
+            }
+        }   
+
+        //Include all relations from given pages
+        int size = filteredList.size();
+        for(int i = 0; i < size; i++) {
+            filteredList.addAll(getRelationsRec(pages, filteredList.get(i)));
+        }
+
+        //Remove doubles
+        filteredList = removeDoubles(filteredList);
+
+        return filteredList;
+    }
+
+    private List<Page> getRelationsRec(List<Page> pagesList, Page currentPage) {
+        List<Page> pages = new ArrayList<>();
+        List<Page> relations = currentPage.getRelations();
+        if(relations != null) {
+            for(Page page : relations) {
+                pages.addAll(getRelationsRec(pagesList, page));
+                pages.add(page);
+            }
+        } 
+
+        return pages;
+    }
+
+    private List<Page> removeDoubles(List<Page> pagesList) {
+        ArrayList<Page> pages = new ArrayList<>(pagesList);
+
+        for(int i = 0; i < pages.size(); i++) {
+            Page currentPage = pages.get(i);
+            for(int z = i+1; z < pages.size(); z++) {
+                if(pages.get(z).equals(currentPage)) {
+                    pages.remove(z); //might have to set index - 1
+                    z--;
+                }
+            }
+        }
+        return pages;
     }
 }

@@ -9,7 +9,8 @@ public enum CommandParam {
 	REL('r'), 
 	REF('f'), 
 	HELP('h'),
-	LISTALL('L');
+	LISTALL('L'),
+	INCLUDE('i');
 
 	private char character;
 

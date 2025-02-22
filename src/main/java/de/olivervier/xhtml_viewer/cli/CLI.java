@@ -3,6 +3,7 @@ package de.olivervier.xhtml_viewer.cli;
 import java.io.File;
 import java.util.List;
 import java.util.Scanner;
+import java.util.regex.Pattern;
 
 import de.olivervier.xhtml_viewer.diagram.DiagramExport;
 import de.olivervier.xhtml_viewer.model.Page;
@@ -61,7 +62,25 @@ public class CLI {
 					}
 					break;
 				case EXPORT:
-					new DiagramExport().handleExport(pages, cmd.getActionValue());
+					String includeExpression = null;
+					System.out.println("Type in regex pattern to filter (type . for no pattern)");
+					
+					try {
+						includeExpression = scanner.nextLine();
+					} catch(Exception e) {
+						System.err.println("Error reading in pattern");
+					}
+
+					if(!includeExpression.equals(".")) {
+						try {
+							Pattern.compile(includeExpression);
+						} catch (Exception e) {
+							System.err.println("Invalid pattern");
+							break;
+						}
+					}
+
+					new DiagramExport().handleExport(pages, cmd.getActionValue(), includeExpression);
 				default:
 					break;
 			}
