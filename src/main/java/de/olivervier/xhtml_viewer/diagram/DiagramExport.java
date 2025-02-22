@@ -118,6 +118,11 @@ public class DiagramExport {
         }
     }
 
+    /**
+     * Sort pages after their name
+     * @param pages
+     * @return new list of sorted pages
+     */
     private List<Page> sortAfterName(List<Page> pages) {
         ArrayList<Page> newPages = new ArrayList<Page>();
         newPages.addAll(pages);
@@ -167,7 +172,14 @@ public class DiagramExport {
 
         return filteredList;
     }
-
+    
+    /**
+     * Get all relations recursively without considering the possibility
+     * of doubles.
+     * @param pagesList
+     * @param currentPage
+     * @return new list of relations
+     */
     private List<Page> getRelationsRec(List<Page> pagesList, Page currentPage) {
         List<Page> pages = new ArrayList<>();
         List<Page> relations = currentPage.getRelations();
@@ -188,7 +200,7 @@ public class DiagramExport {
             Page currentPage = pages.get(i);
             for(int z = i+1; z < pages.size(); z++) {
                 if(pages.get(z).equals(currentPage)) {
-                    pages.remove(z); //might have to set index - 1
+                    pages.remove(z);
                     z--;
                 }
             }
