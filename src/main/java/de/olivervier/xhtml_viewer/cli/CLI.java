@@ -171,34 +171,6 @@ public class CLI {
 		}
 	}
 
-	public void printPage() {
-
-		for (Page page : pages) {
-
-			System.out.println("> " + page.getName());
-			if (!page.getParameters().isEmpty()) {
-				System.out.println("  Containing following parameters");
-				for (Param param : page.getParameters()) {
-					System.out.println("    '%s' as '%s'".formatted(param.getName(), param.getValue()));
-				}
-			}
-
-			if (!page.getRelations().isEmpty()) {
-				System.out.println("  Containg following relations");
-				for (Page relation : page.getRelations()) {
-					System.out.println("    Name: " + relation.getName());
-					if (!relation.getParameters().isEmpty()) {
-						System.out.println("      Containing following parameters");
-						for (Param param : relation.getParameters()) {
-							System.out.println("        '%s' as '%s'".formatted(param.getName(), param.getValue()));
-						}
-					}
-				}
-			}
-			System.out.println();
-		}
-	}
-
 	public void printContext() {
 		String contextName = context == null ? "" : context.getName();
 		System.out.print("#" + contextName + "   ");
