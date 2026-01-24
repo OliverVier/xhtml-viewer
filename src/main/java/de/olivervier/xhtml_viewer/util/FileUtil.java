@@ -1,6 +1,9 @@
 package de.olivervier.xhtml_viewer.util;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 
 public class FileUtil {
 
@@ -75,4 +78,29 @@ public class FileUtil {
 		}
         return relativePathName;
     }
+
+    /**
+     * Finds all distinct subfolders of the given directories
+     * @param directories List of directories to search the subfolders
+     */
+    public static List<File> findDirectoriesRecursive(List<File> directories) {
+        HashSet<File> directorySet = new HashSet<File>();
+        directories.forEach(dir -> directorySet.add(dir));
+        for(File directory : directories) {
+            findDirectoriesRecursive(directorySet, directory);
+        }
+
+        ArrayList<File> foundDirectories = new ArrayList<>();
+        directorySet.stream().forEach(dir -> foundDirectories.add(dir));
+
+        return foundDirectories;
+    }
+
+    private static void findDirectoriesRecursive(HashSet<File> directories, File currentDirectory) {
+		for(File file : currentDirectory.listFiles()) {
+			if(!file.isDirectory()) continue;
+			directories.add(file);
+			findDirectoriesRecursive(directories, file);
+		}
+	}
 }

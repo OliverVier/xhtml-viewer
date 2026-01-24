@@ -67,9 +67,19 @@ public class XHTMLReader {
 				String relativePathName = FileUtil.getRelativePath(basepath, file.getPath());
 				Page currentPage = pagesMap.get(relativePathName);
 				
+				File currentFolder = file.getParentFile();
+				if(currentFolder == null ) {
+					System.err.println("Could not find parent folder!"); 
+					continue;
+				}
+
+				
 				currentPage.getRelations().addAll(findCompositions(doc, basepath, pagesMap));
 				currentPage.getParameters().addAll(findParameters(doc));
-				findIncludes(doc, basepath, pagesMap).forEach(foreignPage -> foreignPage.getRelations().add(currentPage));
+				
+				// Fix: ui:include src attribute only works with resources that are relative to the file.
+				String currentFolderPath = currentFolder.getAbsolutePath(); 
+				findIncludes(doc, currentFolderPath, basepath, pagesMap).forEach(foreignPage -> foreignPage.getRelations().add(currentPage));
 
 			} catch (ParserConfigurationException | SAXException | IOException e) {
 				e.printStackTrace();
@@ -157,7 +167,7 @@ public class XHTMLReader {
 	 * @param pages Map containing all possible xhtml pages of type {@link Page}
 	 * @return list of xhtml pages as type {@link Param} in xhtml document
 	 */
-	public List<Page> findIncludes(Document doc, String basepath, Map<String, Page> pages) {
+	public List<Page> findIncludes(Document doc, String currentFolderPath, String webappRootFolder, Map<String, Page> pages) {
 		
 		NodeList includeNodes = doc.getElementsByTagName("ui:include");
 		List<Page> relations = new ArrayList<>();
@@ -174,12 +184,13 @@ public class XHTMLReader {
 			}
 			String srcValue = srcAttribute.getNodeValue();
 
-			File file = new File(Paths.get(basepath,srcValue).toString());
+			File file = new File(Paths.get(currentFolderPath,srcValue).toString());
 			if(!file.exists()) {
+				System.out.println(file.getAbsolutePath());
 				throw new IllegalArgumentException("Include file does not exist!");
 			}
 
-			String relativeFilePath = FileUtil.getRelativePath(basepath, file.getPath());
+			String relativeFilePath = FileUtil.getRelativePath(webappRootFolder, file.getPath());
 
 			if(pages.containsKey(relativeFilePath)) {
 				Page foreignPage = pages.get(relativeFilePath);
@@ -187,6 +198,8 @@ public class XHTMLReader {
 					continue;
 				}
 				relations.add(foreignPage);
+			} else {
+				System.err.println(relativeFilePath + " not found");
 			}
 		}
 		

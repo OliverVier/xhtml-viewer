@@ -49,9 +49,12 @@ public class PageReader {
 		if(directories.isEmpty()) {
 			throw new IllegalArgumentException("No directories with given filepaths found!");
 		}
+		
+		// Find subfolders
+		List<File> dirsWithSubfolders = FileUtil.findDirectoriesRecursive(directories);
 
 		List<File> files = new ArrayList<File>();
-		for(File dir : directories) {
+		for(File dir : dirsWithSubfolders) {
 			if(dir.listFiles()==null) {
 				continue;
 			}
