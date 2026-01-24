@@ -42,6 +42,13 @@ public class DiagramExport {
         }
         pages = sortAfterName(pages);
 
+        // Processing names
+        for (Page page : pages) {
+            page.setName(page.getName()
+                             .replace("-", "")
+                             .replace("\\", "."));
+        }
+
         //Start uml file, add options
         fileContent = addFormattedLine(fileContent, START_DIAGRAM_FORMAT, filename);
         for(String option : DIAGRAM_OPTIONS) {
