@@ -79,7 +79,7 @@ public class XHTMLReader {
 				
 				// Fix: ui:include src attribute only works with resources that are relative to the file.
 				String currentFolderPath = currentFolder.getAbsolutePath(); 
-				findIncludes(doc, currentFolderPath, basepath, pagesMap).forEach(foreignPage -> foreignPage.getRelations().add(currentPage));
+				findIncludes(doc, currentFolderPath, basepath, pagesMap).forEach(foreignPage -> currentPage.getRelations().add(foreignPage));
 
 			} catch (ParserConfigurationException | SAXException | IOException e) {
 				e.printStackTrace();
