@@ -29,7 +29,10 @@ public class CommandImpl {
 			if (isParameter(userInput)) {
 				action = null;
 				params = extractCommandParams(userInput);
-			} else {
+			} else if(userInput.toLowerCase().equals(Command.EXPORT.asString())) {
+				action = Command.EXPORT;
+			}
+			else {
 				throw new IllegalArgumentException("Unexpected keyword without specifier");
 			}
 		}

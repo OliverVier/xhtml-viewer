@@ -180,6 +180,7 @@ public class CLI {
 		System.out.println(
 				"\nxhtml viewer started. Possible options:" +
 						"\n-----------------" +
+						"\nexport" +
 						"\nset PAGE_NAME" +
 						"\nonly usable when page is set:" +
 						"\n-p | get every parameter" +
