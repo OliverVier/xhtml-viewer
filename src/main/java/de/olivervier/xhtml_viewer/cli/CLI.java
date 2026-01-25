@@ -115,6 +115,26 @@ public class CLI {
 						context = page;
 					}
 					break;
+				case EXPORT:
+					String includeExpression = null;
+					System.out.println("Type in regex pattern to filter (type . for no pattern)");
+					
+					try {
+						includeExpression = scanner.nextLine();
+					} catch(Exception e) {
+						System.err.println("Error reading in pattern");
+					}
+
+					if(!includeExpression.equals(".")) {
+						try {
+							Pattern.compile(includeExpression);
+						} catch (Exception e) {
+							System.err.println("Invalid pattern");
+							break;
+						}
+					}
+
+					new DiagramExport().handleExport(pages, cmd.getActionValue(), includeExpression);
 				default:
 					break;
 			}
