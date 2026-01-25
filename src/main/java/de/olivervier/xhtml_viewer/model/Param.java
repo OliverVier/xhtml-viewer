@@ -23,4 +23,8 @@ public class Param {
 	public String toString() {
 		return "%s - %s".formatted(name, value);
 	}
+	@Override
+	public Param clone() {		
+		return new Param(name, value);
+	}
 }

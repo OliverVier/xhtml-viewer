@@ -34,7 +34,11 @@ public class DiagramExport {
         String datetime = DATE_TIME_FORMATTER.format(localDateTime);
         String filename = "plantuml-"+datetime+".plantuml";
 
-        List<Page> pages = pagesList; 
+        List<Page> pages = new ArrayList<Page>();
+        for (Page page : pagesList) {
+            pages.add(page.clone());
+        }
+
 
         //Filter pages, then sort
         if(!includePattern.equals(".")) {
