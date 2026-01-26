@@ -1,6 +1,5 @@
 package de.olivervier.xhtml_viewer.model;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class Page {
@@ -29,20 +28,5 @@ public class Page {
 	}
 	public void setRelations(List<Page> relations) {
 		this.relations = relations;
-	}
-
-	@Override
-	public Page clone() {
-
-		String newNameString = name;
-
-		List<Param> newParameters = new ArrayList<>();
-		for (Param param : parameters) {
-			newParameters.add(param.clone());
-		}
-		
-		// Relations remain the same
-
-		return new Page(newNameString, newParameters, relations);
 	}
 }
