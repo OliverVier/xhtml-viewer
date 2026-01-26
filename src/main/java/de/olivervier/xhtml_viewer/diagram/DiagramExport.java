@@ -42,13 +42,6 @@ public class DiagramExport {
         }
         pages = sortAfterName(pages);
 
-        // Processing names
-        for (Page page : pages) {
-            page.setName(page.getName()
-                             .replace("-", "")
-                             .replace("\\", "."));
-        }
-
         //Start uml file, add options
         fileContent = addFormattedLine(fileContent, START_DIAGRAM_FORMAT, filename);
         for(String option : DIAGRAM_OPTIONS) {
@@ -59,7 +52,9 @@ public class DiagramExport {
         
         //1. Create objects
         for(Page page : pages) {
-            fileContent = addFormattedLine(fileContent, OBJECT_NAME_FORMAT, page.getName());
+            fileContent = addFormattedLine(fileContent, OBJECT_NAME_FORMAT, page.getName()
+                                                                                .replace("-", "")
+                                                                                .replace("\\", "."));
         }
 
         //2. Add object parameters
@@ -67,7 +62,10 @@ public class DiagramExport {
             for(Param param : page.getParameters()) {
                 fileContent = addFormattedLine(fileContent, 
                                                OBJECT_PARAMETER_FORMAT, 
-                                               page.getName(), param.getName()+"-"+param.getValue());
+                                               page.getName()
+                                                   .replace("-", "")
+                                                   .replace("\\", "."), 
+                                               param.getName()+"-"+param.getValue());
             }
         }
 
@@ -76,8 +74,12 @@ public class DiagramExport {
             for(Page relation : page.getRelations()) {
                 fileContent = addFormattedLine(fileContent, 
                                                OBJECT_RELATION_FORMAT, 
-                                               page.getName(),
-                                               relation.getName());
+                                               page.getName()
+                                                   .replace("-", "")
+                                                   .replace("\\", "."),
+                                               relation.getName()
+                                                       .replace("-", "")
+                                                       .replace("\\", "."));
             }
         }
 

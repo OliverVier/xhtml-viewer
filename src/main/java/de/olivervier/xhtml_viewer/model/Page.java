@@ -14,19 +14,10 @@ public class Page {
 	public String getName() {
 		return name;
 	}
-	public void setName(String name) {
-		this.name = name;
-	}
 	public List<Param> getParameters() {
 		return parameters;
 	}
-	public void setParameters(List<Param> parameters) {
-		this.parameters = parameters;
-	}
 	public List<Page> getRelations() {
 		return relations;
-	}
-	public void setRelations(List<Page> relations) {
-		this.relations = relations;
 	}
 }

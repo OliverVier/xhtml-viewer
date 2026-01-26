@@ -7,7 +7,6 @@ import java.util.regex.Pattern;
 
 import de.olivervier.xhtml_viewer.diagram.DiagramExport;
 import de.olivervier.xhtml_viewer.model.Page;
-import de.olivervier.xhtml_viewer.model.Param;
 import de.olivervier.xhtml_viewer.reader.PageReader;
 import de.olivervier.xhtml_viewer.reader.XHTMLReader;
 
