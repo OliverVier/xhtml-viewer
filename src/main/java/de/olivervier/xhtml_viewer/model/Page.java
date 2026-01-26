@@ -5,8 +5,8 @@ import java.util.List;
 public class Page {
 	private String name;
 	private List<Param> parameters;
-	private List<Page> relations;
-	public Page(String name, List<Param> parameters, List<Page> relations) {
+	private List<Relation> relations;
+	public Page(String name, List<Param> parameters, List<Relation> relations) {
 		this.name = name;
 		this.parameters = parameters;
 		this.relations = relations;
@@ -17,7 +17,7 @@ public class Page {
 	public List<Param> getParameters() {
 		return parameters;
 	}
-	public List<Page> getRelations() {
+	public List<Relation> getRelations() {
 		return relations;
 	}
 }

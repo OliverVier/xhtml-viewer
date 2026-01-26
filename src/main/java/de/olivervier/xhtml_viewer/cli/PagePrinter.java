@@ -4,6 +4,7 @@ import java.util.List;
 
 import de.olivervier.xhtml_viewer.model.Page;
 import de.olivervier.xhtml_viewer.model.Param;
+import de.olivervier.xhtml_viewer.model.Relation;
 
 public class PagePrinter {
 
@@ -37,13 +38,13 @@ public class PagePrinter {
 			if (context.getRelations() == null || context.getRelations().isEmpty()) {
 				System.out.println(">None");
 			} else {
-				for (Page relation : context.getRelations()) {
-					System.out.println(">Relation: " + relation.getName());
+				for (Relation relation : context.getRelations()) {
+					System.out.println(">Relation: " + relation.getRelation().getName());
 					if(showParameters) {
-						if (relation.getParameters() == null || relation.getParameters().isEmpty()) {
+						if (relation.getRelation().getParameters() == null || relation.getRelation().getParameters().isEmpty()) {
 							System.out.println(">None");
 						} else {
-							for (Param param : relation.getParameters()) {
+							for (Param param : relation.getRelation().getParameters()) {
 								System.out.println(">>" + param);
 							}
 						}

@@ -20,6 +20,8 @@ import org.xml.sax.SAXException;
 
 import de.olivervier.xhtml_viewer.model.Page;
 import de.olivervier.xhtml_viewer.model.Param;
+import de.olivervier.xhtml_viewer.model.Relation;
+import de.olivervier.xhtml_viewer.model.Relation.RelationType;
 import de.olivervier.xhtml_viewer.util.FileUtil;
 
 public class XHTMLReader {
@@ -98,9 +100,9 @@ public class XHTMLReader {
 	 * @param pages Map containing all possible xhtml pages of type {@link Page}
 	 * @return list of compositions matching name in pages-map
 	 */
-	public List<Page> findCompositions(Document doc, String basepath, Map<String, Page> pages) {
+	public List<Relation> findCompositions(Document doc, String basepath, Map<String, Page> pages) {
 		NodeList compositions = doc.getElementsByTagName("ui:composition");
-		List<Page> relations = new ArrayList<>();
+		List<Relation> relations = new ArrayList<>();
 		
 		//Look in composition tag/s for name without xhtml and search in pages map
 		for(int i = 0; i < compositions.getLength(); i++) {
@@ -126,7 +128,7 @@ public class XHTMLReader {
 				if(templatePage==null) {
 					continue;
 				}
-				relations.add(templatePage);
+				relations.add(new Relation(templatePage, RelationType.COMPOSITION));
 			}
 		}
 		
@@ -167,10 +169,10 @@ public class XHTMLReader {
 	 * @param pages Map containing all possible xhtml pages of type {@link Page}
 	 * @return list of xhtml pages as type {@link Param} in xhtml document
 	 */
-	public List<Page> findIncludes(Document doc, String currentFolderPath, String webappRootFolder, Map<String, Page> pages) {
+	public List<Relation> findIncludes(Document doc, String currentFolderPath, String webappRootFolder, Map<String, Page> pages) {
 		
 		NodeList includeNodes = doc.getElementsByTagName("ui:include");
-		List<Page> relations = new ArrayList<>();
+		List<Relation> relations = new ArrayList<>();
 		
 		//Look for ui:includes, add relation in foreignPage to currentPage
 		for(int i = 0; i < includeNodes.getLength(); i++) {
@@ -197,7 +199,7 @@ public class XHTMLReader {
 				if(foreignPage == null) {
 					continue;
 				}
-				relations.add(foreignPage);
+				relations.add(new Relation(foreignPage, RelationType.INCLUDE));
 			} else {
 				System.err.println(relativeFilePath + " not found");
 			}

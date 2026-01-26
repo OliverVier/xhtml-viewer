@@ -13,6 +13,8 @@ import java.util.regex.Pattern;
 
 import de.olivervier.xhtml_viewer.model.Page;
 import de.olivervier.xhtml_viewer.model.Param;
+import de.olivervier.xhtml_viewer.model.Relation;
+import de.olivervier.xhtml_viewer.model.Relation.RelationType;
 
 public class DiagramExport {
     
@@ -24,7 +26,8 @@ public class DiagramExport {
     private final String END_DIAGRAM_FORMAT      = "@enduml";
     private final String OBJECT_NAME_FORMAT  = "object %s";
     private final String OBJECT_PARAMETER_FORMAT = "%s : %s";
-    private final String OBJECT_RELATION_FORMAT  = "%s ---> %s";
+    private final String OBJECT_COMPOSITION_FORMAT  = "%s ---> %s";
+    private final String OBJECT_INCLUDE_FORMAT  = "%s ---> %s : INCLUDE";
     private final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
 
     public void handleExport(List<Page> pagesList, String outputPath, String includePattern) {
@@ -71,13 +74,13 @@ public class DiagramExport {
 
         //3. Draw object relations
         for(Page page : pages) {
-            for(Page relation : page.getRelations()) {
+            for(Relation relation : page.getRelations()) {
                 fileContent = addFormattedLine(fileContent, 
-                                               OBJECT_RELATION_FORMAT, 
+                                               relation.getType().equals(RelationType.COMPOSITION) ? OBJECT_COMPOSITION_FORMAT : OBJECT_INCLUDE_FORMAT, 
                                                page.getName()
                                                    .replace("-", "")
                                                    .replace("\\", "."),
-                                               relation.getName()
+                                               relation.getRelation().getName()
                                                        .replace("-", "")
                                                        .replace("\\", "."));
             }
@@ -163,8 +166,8 @@ public class DiagramExport {
 
         //Include all pages having relationship to given page
         for(Page page: pages) {
-            for(Page relpage : page.getRelations()) {
-                if (filteredList.contains(relpage)) {
+            for(Relation relation : page.getRelations()) {
+                if (filteredList.contains(relation.getRelation())) {
                     filteredList.add(page);
                 }
             }
@@ -173,7 +176,7 @@ public class DiagramExport {
         //Include all relations from given pages
         int size = filteredList.size();
         for(int i = 0; i < size; i++) {
-            filteredList.addAll(getRelationsRec(pages, filteredList.get(i)));
+            filteredList.addAll(getRelationPagesRec(pages, filteredList.get(i)));
         }
 
         //Remove doubles
@@ -189,13 +192,13 @@ public class DiagramExport {
      * @param currentPage
      * @return new list of relations
      */
-    private List<Page> getRelationsRec(List<Page> pagesList, Page currentPage) {
+    private List<Page> getRelationPagesRec(List<Page> pagesList, Page currentPage) {
         List<Page> pages = new ArrayList<>();
-        List<Page> relations = currentPage.getRelations();
+        List<Relation> relations = currentPage.getRelations();
         if(relations != null) {
-            for(Page page : relations) {
-                pages.addAll(getRelationsRec(pagesList, page));
-                pages.add(page);
+            for(Relation relation : relations) {
+                pages.addAll(getRelationPagesRec(pagesList, relation.getRelation()));
+                pages.add(relation.getRelation());
             }
         } 
 
