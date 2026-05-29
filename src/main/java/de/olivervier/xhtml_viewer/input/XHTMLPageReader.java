@@ -18,14 +18,28 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import de.olivervier.xhtml_viewer.model.FileExtension;
 import de.olivervier.xhtml_viewer.model.Page;
 import de.olivervier.xhtml_viewer.model.Param;
 import de.olivervier.xhtml_viewer.model.Relation;
 import de.olivervier.xhtml_viewer.model.Relation.RelationType;
 import de.olivervier.xhtml_viewer.util.FileUtil;
 
-public class XHTMLReader {
+public class XHTMLPageReader implements PageReader{
 	
+	List<Page> pages;
+
+	@Override
+	public void init(String basepath) {
+		List<File> files = new FileFinder(basepath, FileExtension.XHTML).read();
+		this.pages = readPages(basepath, files);
+	}
+
+	@Override
+	public List<Page> getPages() {
+		return pages;
+	}
+
 	/**
 	 * Reads xhtml pages and finds relationships and parameters between them.
 	 * @param files pages as xhtml to be read

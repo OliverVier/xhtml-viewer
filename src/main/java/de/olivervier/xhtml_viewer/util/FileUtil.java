@@ -41,8 +41,8 @@ public class FileUtil {
      * 
      * <p>- test.pdf -> pdf</p>
      * <p>- test.p -> p </p>
-     * <p>- test. -> null </p>
-     * <p>- test -> null </p>
+     * <p>- test -> empty </p>
+     * <p>- test. -> empty </p>
      * 
      * @param file
      * @return file-extension when exists, returns null when extension length is 
@@ -55,11 +55,11 @@ public class FileUtil {
     private static String readFileNameExtension(String name) {
         int lastDotIndex = name.lastIndexOf('.');
         if(lastDotIndex == -1) {
-            return null;
+            return "";
         }
 
-        String extension = name.substring(lastDotIndex, name.length());
-        return extension.length() > 0 ? extension : null;
+        String extension = name.substring(lastDotIndex+1, name.length());
+        return extension.length() > 0 ? extension : "";
     }
 
     /**

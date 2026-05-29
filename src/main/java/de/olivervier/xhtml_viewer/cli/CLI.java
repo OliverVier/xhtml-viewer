@@ -1,14 +1,13 @@
 package de.olivervier.xhtml_viewer.cli;
 
-import java.io.File;
-import java.io.Reader;
 import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
 import de.olivervier.xhtml_viewer.diagram.DiagramExport;
 import de.olivervier.xhtml_viewer.input.PageReader;
-import de.olivervier.xhtml_viewer.input.XHTMLReader;
+import de.olivervier.xhtml_viewer.input.XHTMLPageReader;
+import de.olivervier.xhtml_viewer.model.FileExtension;
 import de.olivervier.xhtml_viewer.model.Page;
 
 public class CLI {
@@ -20,10 +19,10 @@ public class CLI {
 	public CLI() {
 	}
 
-	public void run(String basepath, String[] filepaths) {
+	public void run(String basepath) {
 
 		scanner = new Scanner(System.in);
-		pages = new PageReader(basepath, filepaths).getPages();
+		pages = readPages(basepath, FileExtension.XHTML);
 
 		printHelp();
 
@@ -47,6 +46,15 @@ public class CLI {
 				executeInContext(cmd);
 			}
 		}
+	}
+
+	public List<Page> readPages(String basepath, FileExtension extension) {
+		if(FileExtension.XHTML.equals(extension)) {
+			PageReader reader = new XHTMLPageReader();
+			reader.init(basepath);
+			return reader.getPages();
+		}
+		return null;
 	}
 
 	public void executeInNoContext(CommandImpl cmd) {
