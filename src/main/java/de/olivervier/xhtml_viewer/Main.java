@@ -17,7 +17,7 @@ public class Main {
 		
 		if(filepaths.length == 0) {
 			filepaths = new String[]{""};
-		} else {
+ 		} else {
 			for(int i = 0; i < filepaths.length; i++) {
 				filepaths[i] = args[i+1];
 			}

@@ -1,19 +1,33 @@
-package de.olivervier.xhtml_viewer.reader;
+package de.olivervier.xhtml_viewer.input;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.olivervier.xhtml_viewer.model.Page;
 import de.olivervier.xhtml_viewer.util.FileUtil;
 
 public class PageReader {
+
+	private List<Page> pages;
+
+
+	public PageReader(String basepath, String[] dirPaths) {
+		List<File> files = readFiles(basepath, dirPaths);
+		XHTMLReader reader = new XHTMLReader();
+		this.pages = reader.readPages(basepath, files);
+	}
+
+	public List<Page> getPages() {
+		return pages;
+	}
 
 	/**
 	 * Reads in xhtml pages in the given directory paths
 	 * @param dirPaths absolute directory paths
 	 * @return list of xhtml files as List<File>
 	 */
-	public List<File> filterPages(String basepath, String ...dirPaths) throws IllegalArgumentException {
+	private List<File> readFiles(String basepath, String ...dirPaths) throws IllegalArgumentException {
 		
 		if(basepath == null) {
 			throw new IllegalArgumentException("No basepath given");

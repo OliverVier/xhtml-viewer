@@ -1,4 +1,4 @@
-package de.olivervier.xhtml_viewer.reader;
+package de.olivervier.xhtml_viewer.input;
 
 import java.io.File;
 import java.io.IOException;
