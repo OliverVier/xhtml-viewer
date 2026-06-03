@@ -4,11 +4,11 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
-import de.olivervier.xhtml_viewer.diagram.DiagramExport;
-import de.olivervier.xhtml_viewer.input.PageReader;
-import de.olivervier.xhtml_viewer.input.XHTMLPageReader;
+import de.olivervier.xhtml_viewer.export.DiagramExport;
 import de.olivervier.xhtml_viewer.model.FileExtension;
 import de.olivervier.xhtml_viewer.model.Page;
+import de.olivervier.xhtml_viewer.pages.PageReader;
+import de.olivervier.xhtml_viewer.pages.XHTMLPageReader;
 
 public class CLI {
 

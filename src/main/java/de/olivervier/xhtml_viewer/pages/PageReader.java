@@ -1,4 +1,4 @@
-package de.olivervier.xhtml_viewer.input;
+package de.olivervier.xhtml_viewer.pages;
 
 import java.util.List;
 

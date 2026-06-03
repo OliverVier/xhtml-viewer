@@ -1,4 +1,4 @@
-package de.olivervier.xhtml_viewer.diagram;
+package de.olivervier.xhtml_viewer.export;
 
 import java.io.File;
 import java.io.FileNotFoundException;
