@@ -27,7 +27,7 @@ import de.olivervier.xhtml_viewer.util.FileUtil;
 
 public class XHTMLPageReader implements PageReader{
 	
-	List<Page> pages;
+	private List<Page> pages;
 
 	@Override
 	public void init(String basepath) {
@@ -45,12 +45,11 @@ public class XHTMLPageReader implements PageReader{
 	 * @param files pages as xhtml to be read
 	 * @return list of xhtml pages as Page objects
 	 */
-	public List<Page> readPages(String basepath, List<File> files) {
+	private List<Page> readPages(String basepath, List<File> files) {
 		
 		if(basepath == null) {
 			throw new IllegalArgumentException("basepath cannot be null!");
 		}
-
 		if(files == null) {
 			throw new IllegalArgumentException("parameter 'files' must not be null!");
 		}
@@ -58,18 +57,7 @@ public class XHTMLPageReader implements PageReader{
 		basepath = FileUtil.getFilePath(basepath);
 		
 		//Prefill
-		Map<String, Page> pagesMap = new HashMap<>();
-		for(File currentFile : files) {
-			String relativePathName = null;
-			
-			if(!currentFile.getPath().contains(basepath)) {
-				throw new IllegalArgumentException();
-			} else {
-				relativePathName = FileUtil.getRelativePath(basepath, currentFile.getPath());
-			}
-			
-			pagesMap.put(relativePathName, new Page(relativePathName,new ArrayList<>(),new ArrayList<>()));
-		}
+		Map<String, Page> pagesMap = prefillPages(files, basepath);
 		
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		for(File file : files) {			
@@ -106,6 +94,16 @@ public class XHTMLPageReader implements PageReader{
 		pagesList.addAll(pagesMap.values().stream().toList());
 		return pagesList;
 	}
+
+	private Map<String, Page> prefillPages(List<File> files, String basePath) {
+		Map<String, Page> pagesMap = new HashMap<>();
+		for(File currentFile : files) {
+			String relativePathName = FileUtil.getRelativePath(basePath, currentFile.getPath());
+			pagesMap.put(relativePathName, 
+						 new Page(relativePathName, new ArrayList<>(), new ArrayList<>()));
+		}
+		return pagesMap;
+	}
 	
 	/**
 	 * Looks for ui:composition tags in the given xml structure. Returns composition names
@@ -114,7 +112,7 @@ public class XHTMLPageReader implements PageReader{
 	 * @param pages Map containing all possible xhtml pages of type {@link Page}
 	 * @return list of compositions matching name in pages-map
 	 */
-	public List<Relation> findCompositions(Document doc, String basepath, Map<String, Page> pages) {
+	private List<Relation> findCompositions(Document doc, String basepath, Map<String, Page> pages) {
 		NodeList compositions = doc.getElementsByTagName("ui:composition");
 		List<Relation> relations = new ArrayList<>();
 		
@@ -155,7 +153,7 @@ public class XHTMLPageReader implements PageReader{
 	 * @param doc xml document of xhtml file
 	 * @return list of ui:param as type {@link Param} of given xhtml document
 	 */
-	public List<Param> findParameters(Document doc) {
+	private List<Param> findParameters(Document doc) {
 		
 		NodeList parameterNodes = doc.getElementsByTagName("ui:param");
 		List<Param> parameters = new ArrayList<>();
@@ -183,7 +181,7 @@ public class XHTMLPageReader implements PageReader{
 	 * @param pages Map containing all possible xhtml pages of type {@link Page}
 	 * @return list of xhtml pages as type {@link Param} in xhtml document
 	 */
-	public List<Relation> findIncludes(Document doc, String currentFolderPath, String webappRootFolder, Map<String, Page> pages) {
+	private List<Relation> findIncludes(Document doc, String currentFolderPath, String webappRootFolder, Map<String, Page> pages) {
 		
 		NodeList includeNodes = doc.getElementsByTagName("ui:include");
 		List<Relation> relations = new ArrayList<>();
