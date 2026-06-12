@@ -22,7 +22,7 @@ public class CLI {
 	public void run(String type, String directoryPath) {
 		
 		if(Objects.isNull(type)) {
-			UserInteraction.sendMessage("Type must be java or xhtml");
+			UserInteraction.sendMessage("Type must not be empty");
 			return;
 		}
 		if(Objects.isNull(directoryPath)) {
