@@ -20,6 +20,6 @@ public class Relation {
 	}
 	@Override
 	public String toString() {
-		return "%s - %s".formatted(relation.getName(), type.name());
+		return "%s - %s".formatted(relation.getFilePath().toString(), type.name());
 	}
 }

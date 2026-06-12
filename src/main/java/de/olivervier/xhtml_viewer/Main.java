@@ -9,10 +9,10 @@ public class Main {
 	}
 
 	public void run(String[] args) {
-		if(args.length == 0) {
-			System.err.println("Program needs a directory path to operate");
+		if(args.length != 2) {
+			System.err.println("viewer [TYPE] [DIRECTORY_PATH]");
 			return;
 		}
-		new CLI().run(args[0]);
+		new CLI().run(args[0], args[1]);
 	}
 }

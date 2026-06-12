@@ -5,33 +5,32 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.olivervier.xhtml_viewer.model.FileExtension;
+import de.olivervier.xhtml_viewer.model.InputOption;
 import de.olivervier.xhtml_viewer.util.FileUtil;
 
 public class FileFinder {
 
     private Path basePath;
-	private FileExtension extension;
+	private InputOption extension;
     
-    public FileFinder(String basepath, FileExtension extension) {
+    public FileFinder(Path basepath, InputOption extension) {
         if(basepath == null) {
 			throw new IllegalArgumentException("No basepath given");
 		}
 
-        File file = new File(basepath);
+        File file = basepath.toFile();
 		if(!file.exists()) {
 			throw new IllegalArgumentException("path " + file.getAbsolutePath() + " does not exist");
 		}
 
-        Path path = Path.of(basepath);
-        if(!path.toFile().isDirectory()) {
+        if(!basepath.toFile().isDirectory()) {
             throw new IllegalArgumentException("Given path is not a directory");
         }
 		if(extension == null) {
 			throw new IllegalArgumentException("Extension must not be null");
 		}
 
-        this.basePath = path;
+        this.basePath = basepath;
 		this.extension = extension;
     }
 
@@ -53,8 +52,8 @@ public class FileFinder {
 			}
 			
 			for(File file : resolvedFiles) {
-				String fileExtension = FileUtil.getFileExtension(file);
-				if(fileExtension != null && fileExtension.equals(extension.getExtension())) {				
+				String fileExtension = FileUtil.getFileExtension(file).toUpperCase();
+				if(fileExtension != null && fileExtension.equals(extension.getName())) {				
 					files.add(file);
 				}
 			}

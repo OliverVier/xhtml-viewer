@@ -1,218 +1,98 @@
 package de.olivervier.xhtml_viewer.cli;
 
+import java.nio.file.InvalidPathException;
+import java.nio.file.NotDirectoryException;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 import de.olivervier.xhtml_viewer.export.DiagramExport;
-import de.olivervier.xhtml_viewer.model.FileExtension;
+import de.olivervier.xhtml_viewer.model.InputOption;
 import de.olivervier.xhtml_viewer.model.Page;
 import de.olivervier.xhtml_viewer.pages.PageReader;
 import de.olivervier.xhtml_viewer.pages.XHTMLPageReader;
 
 public class CLI {
 
-	private Scanner scanner;
-	private Page context;
-	private List<Page> pages;
-
 	public CLI() {
 	}
 
-	public void run(String basepath) {
+	public void run(String type, String directoryPath) {
+		
+		if(Objects.isNull(type)) {
+			UserInteraction.sendMessage("Type must be java or xhtml");
+			return;
+		}
+		if(Objects.isNull(directoryPath)) {
+			UserInteraction.sendMessage("Filepath must not be empty");
+			return;
+		}
+		
+		Path pathToDirectory;
+		try {
+			pathToDirectory = Path.of(directoryPath);
+			if(!pathToDirectory.toFile().isDirectory()) {
+				throw new NotDirectoryException(pathToDirectory.toFile().getAbsolutePath());
+			}
+		} catch (InvalidPathException e) {
+			UserInteraction.sendMessage("Path is invalid");
+			return;
+		} catch (NotDirectoryException e) {
+			UserInteraction.sendMessage("Given path does not point to an directory");
+			return;
+		} catch (Exception e) {
+			UserInteraction.sendMessage("Unknown exception");
+			return;
+		}
+		
+		redirectToHandler(type, pathToDirectory);
+	}
 
-		scanner = new Scanner(System.in);
-		pages = readPages(basepath, FileExtension.XHTML);
+	
+	public void redirectToHandler(String type, Path directoryPath) {
+		
+		List<Page> pages = new ArrayList<Page>();
+		InputOption option = InputOption.valueOf(type.toUpperCase());
+		
+		try {			
+			switch (option) {
+			case XHTML: {
+				PageReader reader = new XHTMLPageReader();
+				reader.init(directoryPath);
+				pages = reader.getPages();	
+				break;
+			}
+			default:
+				throw new IllegalArgumentException("Option: " + option.getName() + " is not supported");
+			}
+			
+			if(pages == null || pages.isEmpty()) {
+				UserInteraction.sendMessage("No pages found");
+				return;
+			} 
+			
+			export(pages, type, directoryPath);
+			
+		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
+		}
+	}
 
-		printHelp();
-
-		while (true) {
-
-			printContext();
-
-			String userInput = scanner.nextLine();
-
-			CommandImpl cmd = null;
+	private void export(List<Page> pages, String expression, Path outputPath) {
+		if (!expression.equals(".")) {
 			try {
-				cmd = new CommandImpl(userInput);
-			} catch (IllegalArgumentException e) {
-				System.out.println(e.getMessage());
-				continue;
-			}
-
-			if (context == null) {
-				executeInNoContext(cmd);
-			} else {
-				executeInContext(cmd);
+				Pattern.compile(expression);
+			} catch (Exception e) {
+				System.err.println("Invalid pattern");
+				return;
 			}
 		}
-	}
-
-	public List<Page> readPages(String basepath, FileExtension extension) {
-		if(FileExtension.XHTML.equals(extension)) {
-			PageReader reader = new XHTMLPageReader();
-			reader.init(basepath);
-			return reader.getPages();
-		}
-		return null;
-	}
-
-	public void executeInNoContext(CommandImpl cmd) {
-
-		if (cmd.getAction() != null) {
-			switch (cmd.getAction()) {
-				case SET:
-					Page page = searchForPage(cmd.getActionValue());
-					if (page == null) {
-						System.out.println("Page not found!");
-					} else {
-						context = page;
-					}
-					break;
-				case EXPORT:
-					String includeExpression = null;
-					System.out.println("Type in regex pattern to filter (type . for no pattern)");
-					
-					try {
-						includeExpression = scanner.nextLine();
-					} catch(Exception e) {
-						System.err.println("Error reading in pattern");
-					}
-
-					if(!includeExpression.equals(".")) {
-						try {
-							Pattern.compile(includeExpression);
-						} catch (Exception e) {
-							System.err.println("Invalid pattern");
-							break;
-						}
-					}
-
-					new DiagramExport().handleExport(pages, cmd.getActionValue(), includeExpression);
-				default:
-					break;
-			}
-		}
-
-		if (cmd.getParams() != null) {
-			for (CommandParam param : cmd.getParams()) {
-				switch (param) {
-					case HELP:
-						printHelp();
-						break;
-					case LISTALL:
-						printAllPageNames();
-						break;
-					default:
-						System.out.println("Parameter " + param + " not available in context");
-						break;
-				}
-			}
-		}
-	}
-
-	public void executeInContext(CommandImpl cmd) {
-
-		if (cmd.getAction() != null) {
-			switch (cmd.getAction()) {
-				case SET:
-					Page page = searchForPage(cmd.getActionValue());
-					if (page == null) {
-						System.out.println("Page not found!");
-					} else {
-						context = page;
-					}
-					break;
-				case EXPORT:
-					String includeExpression = null;
-					System.out.println("Type in regex pattern to filter (type . for no pattern)");
-					
-					try {
-						includeExpression = scanner.nextLine();
-					} catch(Exception e) {
-						System.err.println("Error reading in pattern");
-					}
-
-					if(!includeExpression.equals(".")) {
-						try {
-							Pattern.compile(includeExpression);
-						} catch (Exception e) {
-							System.err.println("Invalid pattern");
-							break;
-						}
-					}
-
-					new DiagramExport().handleExport(pages, cmd.getActionValue(), includeExpression);
-				default:
-					break;
-			}
-		}
-
-		if (cmd.getParams() != null) {
-			PagePrinter printer = new PagePrinter(pages, context);
-			for (CommandParam commandParam : cmd.getParams()) {
-				switch (commandParam) {
-					case HELP:
-						printHelp();
-						break;
-					case LISTALL:
-						printAllPageNames();
-						break;
-					case PARAM:
-						printer.showParameters();
-						break;
-					case REC:
-						break;
-					case REF:
-						printer.showReferences();
-						break;
-					case REL:
-						printer.showRelations();
-						break;
-					default:
-						System.out.println("Not implemented");
-						break;
-				}
-			}
-			System.out.println("");
-			printer.print();
-		}
-	}
-
-	private Page searchForPage(String pageName) {
-		for (Page page : pages) {
-			if (page.getName().equals(pageName)) {
-				return page;
-			}
-		}
-		return null;
-	}
-
-	private void printAllPageNames() {
-		for (Page page : pages) {
-			System.out.println(page.getName());
-		}
-	}
-
-	public void printContext() {
-		String contextName = context == null ? "" : context.getName();
-		System.out.print("#" + contextName + "   ");
+		new DiagramExport().handleExport(pages, outputPath, expression);
 	}
 
 	public void printHelp() {
-		System.out.println(
-				"\nxhtml viewer started. Possible options:" +
-						"\n-----------------" +
-						"\nexport" +
-						"\nset PAGE_NAME" +
-						"\nonly usable when page is set:" +
-						"\n-p | get every parameter" +
-						"\n-r | get every relation" +
-						"\n-f | get every reference" +
-						"\n-l | include filename and line" +
-						"\n-----------------" +
-						"\n-h | get help" +
-						"\n-L | list all xhtml pages" +
-						"\n");
+		UserInteraction.sendMessage("viewer [FILE_TYPE] [FILE_PATH]");
 	}
 }

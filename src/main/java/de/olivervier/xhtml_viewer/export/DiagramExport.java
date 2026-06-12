@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -11,6 +12,7 @@ import java.util.IllegalFormatException;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import de.olivervier.xhtml_viewer.cli.UserInteraction;
 import de.olivervier.xhtml_viewer.model.Page;
 import de.olivervier.xhtml_viewer.model.Param;
 import de.olivervier.xhtml_viewer.model.Relation;
@@ -30,7 +32,7 @@ public class DiagramExport {
     private final String OBJECT_INCLUDE_FORMAT  = "%s ---> %s : INCLUDE";
     private final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
 
-    public void handleExport(List<Page> pagesList, String outputPath, String includePattern) {
+    public void handleExport(List<Page> pagesList, Path outputPath, String includePattern) {
         String fileContent = "";
 
         LocalDateTime localDateTime = LocalDateTime.now();
@@ -55,7 +57,7 @@ public class DiagramExport {
         
         //1. Create objects
         for(Page page : pages) {
-            fileContent = addFormattedLine(fileContent, OBJECT_NAME_FORMAT, page.getName()
+            fileContent = addFormattedLine(fileContent, OBJECT_NAME_FORMAT, page.getFilePath().toString()
                                                                                 .replace("-", "")
                                                                                 .replace("\\", "."));
         }
@@ -65,7 +67,7 @@ public class DiagramExport {
             for(Param param : page.getParameters()) {
                 fileContent = addFormattedLine(fileContent, 
                                                OBJECT_PARAMETER_FORMAT, 
-                                               page.getName()
+                                               page.getFilePath().toString()
                                                    .replace("-", "")
                                                    .replace("\\", "."), 
                                                param.getName()+"-"+param.getValue());
@@ -77,10 +79,10 @@ public class DiagramExport {
             for(Relation relation : page.getRelations()) {
                 fileContent = addFormattedLine(fileContent, 
                                                relation.getType().equals(RelationType.COMPOSITION) ? OBJECT_COMPOSITION_FORMAT : OBJECT_INCLUDE_FORMAT, 
-                                               page.getName()
+                                               page.getFilePath().toString()
                                                    .replace("-", "")
                                                    .replace("\\", "."),
-                                               relation.getRelation().getName()
+                                               relation.getRelation().getFilePath().toString()
                                                        .replace("-", "")
                                                        .replace("\\", "."));
             }
@@ -107,9 +109,9 @@ public class DiagramExport {
         return currentString.concat(formattedLine + "\n");
     }
 
-    private void createFileHandler(String filePath, String filename, String fileContent) {
-        if(filePath == null || filePath.isBlank() || filePath.equals(".")) {
-            String execPath = System.getProperty("user.dir");
+    private void createFileHandler(Path filePath, String filename, String fileContent) {
+        if(filePath == null) {
+            Path execPath = Path.of(System.getProperty("user.dir"));
             createFile(execPath, filename, fileContent);
         } 
         else {
@@ -117,7 +119,7 @@ public class DiagramExport {
         }
     }
 
-    private void createFile(String filePath, String filename, String fileContent) {
+    private void createFile(Path filePath, String filename, String fileContent) {
         File newFile = new File(filePath+File.separator+filename);
         try (FileOutputStream stream = new FileOutputStream(newFile)) {
             stream.write(fileContent.getBytes());
@@ -128,6 +130,7 @@ public class DiagramExport {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        UserInteraction.sendMessage("Output file to " + filePath.toAbsolutePath().toString());
     }
 
     /**
@@ -138,7 +141,7 @@ public class DiagramExport {
     private List<Page> sortAfterName(List<Page> pages) {
         ArrayList<Page> newPages = new ArrayList<Page>();
         newPages.addAll(pages);
-        newPages.sort((o1, o2) -> o1.getName().compareTo(o2.getName()));
+        newPages.sort((o1, o2) -> o1.getFilePath().toString().compareTo(o2.getFilePath().toString()));
         return newPages;
     }
 
@@ -159,7 +162,7 @@ public class DiagramExport {
 
         //Filter at first level
         for(Page page : pages) {
-            if(pattern.matcher(page.getName()).find()) {
+            if(pattern.matcher(page.getFilePath().toString()).find()) {
                 filteredList.add(page);
             }
         }
