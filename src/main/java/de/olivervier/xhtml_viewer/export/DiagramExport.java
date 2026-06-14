@@ -66,7 +66,7 @@ public class DiagramExport {
                 fileContent = addFormattedLine(fileContent, 
                                                OBJECT_PARAMETER_FORMAT, 
                                                replaceInvalidCharacters(page.getFilePath().toString()), 
-                                               param.getName()+"-"+param.getValue());
+                                               "%s = \"%s\"".formatted(param.getName(), param.getValue()));
             }
         }
 
