@@ -80,10 +80,10 @@ public class FileUtil {
     }
 
     /**
-     * Finds all distinct subfolders of the given directories
+     * Returns all given directories and their subdirectories
      * @param directories List of directories to search the subfolders
      */
-    public static List<File> findDirectoriesRecursive(List<File> directories) {
+    public static List<File> findSubdirectories(List<File> directories) {
         HashSet<File> directorySet = new HashSet<File>();
         directories.forEach(dir -> directorySet.add(dir));
         for(File directory : directories) {

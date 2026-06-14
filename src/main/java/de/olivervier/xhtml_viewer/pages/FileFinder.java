@@ -42,7 +42,7 @@ public class FileFinder {
         
 		List<File> files = new ArrayList<File>();
 		
-		List<File> directories = FileUtil.findDirectoriesRecursive(List.of(basePath.toFile()));
+		List<File> directories = FileUtil.findSubdirectories(List.of(basePath.toFile()));
 		for(File dir : directories) {
 			
 			File[] resolvedFiles = dir.listFiles();
