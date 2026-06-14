@@ -57,9 +57,7 @@ public class DiagramExport {
         
         //1. Create objects
         for(Page page : pages) {
-            fileContent = addFormattedLine(fileContent, OBJECT_NAME_FORMAT, page.getFilePath().toString()
-                                                                                .replace("-", "")
-                                                                                .replace("\\", "."));
+            fileContent = addFormattedLine(fileContent, OBJECT_NAME_FORMAT, replaceInvalidCharacters(page.getFilePath().toString()));
         }
 
         //2. Add object parameters
@@ -67,9 +65,7 @@ public class DiagramExport {
             for(Param param : page.getParameters()) {
                 fileContent = addFormattedLine(fileContent, 
                                                OBJECT_PARAMETER_FORMAT, 
-                                               page.getFilePath().toString()
-                                                   .replace("-", "")
-                                                   .replace("\\", "."), 
+                                               replaceInvalidCharacters(page.getFilePath().toString()), 
                                                param.getName()+"-"+param.getValue());
             }
         }
@@ -79,12 +75,8 @@ public class DiagramExport {
             for(Relation relation : page.getRelations()) {
                 fileContent = addFormattedLine(fileContent, 
                                                relation.getType().equals(RelationType.COMPOSITION) ? OBJECT_COMPOSITION_FORMAT : OBJECT_INCLUDE_FORMAT, 
-                                               page.getFilePath().toString()
-                                                   .replace("-", "")
-                                                   .replace("\\", "."),
-                                               relation.getRelation().getFilePath().toString()
-                                                       .replace("-", "")
-                                                       .replace("\\", "."));
+                                               replaceInvalidCharacters(page.getFilePath().toString()),
+                                               replaceInvalidCharacters(relation.getRelation().getFilePath().toString()));
             }
         }
 
@@ -221,5 +213,11 @@ public class DiagramExport {
             }
         }
         return pages;
+    }
+    
+    private String replaceInvalidCharacters(String text) {
+    	return text.replace("-", "")
+                	.replace("\\", ".")
+                	.replace(":", "");
     }
 }
