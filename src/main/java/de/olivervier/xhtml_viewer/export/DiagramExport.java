@@ -75,7 +75,7 @@ public class DiagramExport {
                 fileContent = addFormattedLine(fileContent, 
                                                relation.getType().equals(RelationType.COMPOSITION) ? OBJECT_COMPOSITION_FORMAT : OBJECT_INCLUDE_FORMAT, 
                                                replaceInvalidCharacters(page.getName() + "_" + page.getFilePath().toString()),
-                                               replaceInvalidCharacters(relation.getRelation().getFilePath().toString()));
+                                               replaceInvalidCharacters(relation.getRelation().getName() + "_" + relation.getRelation().getFilePath().toString()));
             }
         }
 
