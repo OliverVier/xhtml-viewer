@@ -26,7 +26,7 @@ public class DiagramExport {
                                                     "top to bottom direction"};
     private final String START_DIAGRAM_FORMAT    = "@startuml %s";
     private final String END_DIAGRAM_FORMAT      = "@enduml";
-    private final String OBJECT_NAME_FORMAT  = "object %s";
+    private final String OBJECT_NAME_FORMAT  = "object \"%s\" as %s";
     private final String OBJECT_PARAMETER_FORMAT = "%s : %s";
     private final String OBJECT_COMPOSITION_FORMAT  = "%s ---> %s";
     private final String OBJECT_INCLUDE_FORMAT  = "%s ---> %s : INCLUDE";
@@ -53,7 +53,10 @@ public class DiagramExport {
         
         //1. Create objects
         for(Page page : pages) {
-            fileContent = addFormattedLine(fileContent, OBJECT_NAME_FORMAT, replaceInvalidCharacters(page.getName() + "_____" + page.getFilePath().toString()));
+            fileContent = addFormattedLine(fileContent, 
+            							   OBJECT_NAME_FORMAT, 
+            							   page.getName() + " - " + page.getFilePath().toString().replace("\\", "/"), 
+            							   replaceInvalidCharacters(page.getName() + "_" + page.getFilePath().toString()));
         }
 
         //2. Add object parameters
@@ -61,7 +64,7 @@ public class DiagramExport {
             for(Param param : page.getParameters()) {
                 fileContent = addFormattedLine(fileContent, 
                                                OBJECT_PARAMETER_FORMAT, 
-                                               replaceInvalidCharacters(page.getName() + "_____" + page.getFilePath().toString()), 
+                                               replaceInvalidCharacters(page.getName() + "_" + page.getFilePath().toString()), 
                                                "%s = \"%s\"".formatted(param.getName(), param.getValue()));
             }
         }
@@ -71,7 +74,7 @@ public class DiagramExport {
             for(Relation relation : page.getRelations()) {
                 fileContent = addFormattedLine(fileContent, 
                                                relation.getType().equals(RelationType.COMPOSITION) ? OBJECT_COMPOSITION_FORMAT : OBJECT_INCLUDE_FORMAT, 
-                                               replaceInvalidCharacters(page.getName() + "_____" + page.getFilePath().toString()),
+                                               replaceInvalidCharacters(page.getName() + "_" + page.getFilePath().toString()),
                                                replaceInvalidCharacters(relation.getRelation().getFilePath().toString()));
             }
         }
