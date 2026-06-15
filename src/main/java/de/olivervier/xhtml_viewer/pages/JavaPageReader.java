@@ -99,7 +99,7 @@ public class JavaPageReader implements PageReader {
 			try {				
 				Class<?> clazz = classLoader.loadClass(binaryName);
 				classes.add(clazz);	
-			} catch (ClassNotFoundException e) {
+			} catch (ClassNotFoundException | NoClassDefFoundError e) {
 				System.err.println("Could not load class with binary name " + binaryName);
 			}
 		}
@@ -126,7 +126,7 @@ public class JavaPageReader implements PageReader {
 			}
 			
 			Class<?> superclazz;
-			while((superclazz = clazz.getSuperclass()) != null && !(superclazz instanceof Object)) {
+			while((superclazz = clazz.getSuperclass()) != null && !(superclazz.getClass().equals(Object.class))) {
 				if(!classMap.containsKey(superclazz)) {
 					classMap.put(superclazz, new Page(superclazz.getName(), jarPath, new ArrayList<Param>(), new ArrayList<Relation>()));
 				}
