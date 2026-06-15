@@ -1,7 +1,8 @@
 package de.olivervier.xhtml_viewer.model;
 
 public enum InputOption {
-	XHTML("XHTML");
+	XHTML("XHTML"),
+	JAVA("JAVA");
 
     private String name;
     private InputOption(String name) {

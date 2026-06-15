@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 import de.olivervier.xhtml_viewer.export.DiagramExport;
 import de.olivervier.xhtml_viewer.model.InputOption;
 import de.olivervier.xhtml_viewer.model.Page;
+import de.olivervier.xhtml_viewer.pages.JavaPageReader;
 import de.olivervier.xhtml_viewer.pages.PageReader;
 import de.olivervier.xhtml_viewer.pages.XHTMLPageReader;
 
@@ -64,6 +65,12 @@ public class CLI {
 				pages = reader.getPages();	
 				break;
 			}
+			case JAVA: {
+				PageReader reader = new JavaPageReader();
+				reader.init(directoryPath);
+				pages = reader.getPages();	
+				break;
+			}
 			default:
 				throw new IllegalArgumentException("Option: " + option.getName() + " is not supported");
 			}
@@ -73,7 +80,7 @@ public class CLI {
 				return;
 			} 
 			
-			export(pages, type, directoryPath);
+			export(pages, type, null);
 			
 		} catch (IllegalArgumentException e) {
 			e.printStackTrace();
