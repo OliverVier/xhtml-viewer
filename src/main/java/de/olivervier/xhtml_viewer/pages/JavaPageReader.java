@@ -126,7 +126,7 @@ public class JavaPageReader implements PageReader {
 			}
 			
 			Class<?> superclazz;
-			while((superclazz = clazz.getSuperclass()) != null) {
+			while((superclazz = clazz.getSuperclass()) != null && !(superclazz instanceof Object)) {
 				if(!classMap.containsKey(superclazz)) {
 					classMap.put(superclazz, new Page(superclazz.getName(), jarPath, new ArrayList<Param>(), new ArrayList<Relation>()));
 				}
