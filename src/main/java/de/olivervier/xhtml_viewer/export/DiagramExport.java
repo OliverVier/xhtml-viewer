@@ -32,7 +32,7 @@ public class DiagramExport {
     private final String OBJECT_INCLUDE_FORMAT  = "%s ---> %s : INCLUDE";
     private final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
 
-    public void handleExport(List<Page> pagesList, Path outputPath, String includePattern) {
+    public void handleExport(List<Page> pagesList, Path outputPath) {
         String fileContent = "";
 
         LocalDateTime localDateTime = LocalDateTime.now();
@@ -40,11 +40,7 @@ public class DiagramExport {
         String filename = "plantuml-"+datetime+".plantuml";
 
         List<Page> pages = pagesList; 
-
-        //Filter pages, then sort
-        if(!includePattern.equals(".")) {
-            pages = filterAfterPattern(pages, includePattern);
-        }
+        
         pages = sortAfterName(pages);
 
         //Start uml file, add options
@@ -57,7 +53,7 @@ public class DiagramExport {
         
         //1. Create objects
         for(Page page : pages) {
-            fileContent = addFormattedLine(fileContent, OBJECT_NAME_FORMAT, replaceInvalidCharacters(page.getFilePath().toString()));
+            fileContent = addFormattedLine(fileContent, OBJECT_NAME_FORMAT, replaceInvalidCharacters(page.getName() + "_____" + page.getFilePath().toString()));
         }
 
         //2. Add object parameters
@@ -65,7 +61,7 @@ public class DiagramExport {
             for(Param param : page.getParameters()) {
                 fileContent = addFormattedLine(fileContent, 
                                                OBJECT_PARAMETER_FORMAT, 
-                                               replaceInvalidCharacters(page.getFilePath().toString()), 
+                                               replaceInvalidCharacters(page.getName() + "_____" + page.getFilePath().toString()), 
                                                "%s = \"%s\"".formatted(param.getName(), param.getValue()));
             }
         }
@@ -75,7 +71,7 @@ public class DiagramExport {
             for(Relation relation : page.getRelations()) {
                 fileContent = addFormattedLine(fileContent, 
                                                relation.getType().equals(RelationType.COMPOSITION) ? OBJECT_COMPOSITION_FORMAT : OBJECT_INCLUDE_FORMAT, 
-                                               replaceInvalidCharacters(page.getFilePath().toString()),
+                                               replaceInvalidCharacters(page.getName() + "_____" + page.getFilePath().toString()),
                                                replaceInvalidCharacters(relation.getRelation().getFilePath().toString()));
             }
         }
@@ -136,49 +132,6 @@ public class DiagramExport {
         newPages.sort((o1, o2) -> o1.getFilePath().toString().compareTo(o2.getFilePath().toString()));
         return newPages;
     }
-
-    /**
-     * Filters pages only at the first level. All pages, that a page is related to, are still shown
-     * @param includePattern regex expression
-     * @return new filtered list with pages, including all their relationships without regard to
-     * the given pattern.
-     */
-    private List<Page> filterAfterPattern(List<Page> pagesList, String includePattern) {
-        
-        List<Page> pages = new ArrayList<>();
-        pages.addAll(pagesList);
-
-        List<Page> filteredList = new ArrayList<Page>();
-
-        Pattern pattern = Pattern.compile(includePattern);
-
-        //Filter at first level
-        for(Page page : pages) {
-            if(pattern.matcher(page.getFilePath().toString()).find()) {
-                filteredList.add(page);
-            }
-        }
-
-        //Include all pages having relationship to given page
-        for(Page page: pages) {
-            for(Relation relation : page.getRelations()) {
-                if (filteredList.contains(relation.getRelation())) {
-                    filteredList.add(page);
-                }
-            }
-        }   
-
-        //Include all relations from given pages
-        int size = filteredList.size();
-        for(int i = 0; i < size; i++) {
-            filteredList.addAll(getRelationPagesRec(pages, filteredList.get(i)));
-        }
-
-        //Remove doubles
-        filteredList = removeDoubles(filteredList);
-
-        return filteredList;
-    }
     
     /**
      * Get all relations recursively without considering the possibility
@@ -216,8 +169,9 @@ public class DiagramExport {
     }
     
     private String replaceInvalidCharacters(String text) {
-    	return text.replace("-", "")
-                	.replace("\\", ".")
+    	return text.replace("$", "")
+    				.replace("-", "")
+                	.replace("\\", "_")
                 	.replace(":", "");
     }
 }

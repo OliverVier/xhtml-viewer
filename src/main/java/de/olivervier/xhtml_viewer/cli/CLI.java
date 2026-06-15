@@ -20,35 +20,29 @@ public class CLI {
 	public CLI() {
 	}
 
-	public void run(String type, String directoryPath) {
+	public void run(String type, String filePath) {
 		
 		if(Objects.isNull(type)) {
 			UserInteraction.sendMessage("Type must not be empty");
 			return;
 		}
-		if(Objects.isNull(directoryPath)) {
+		if(Objects.isNull(filePath)) {
 			UserInteraction.sendMessage("Filepath must not be empty");
 			return;
 		}
 		
-		Path pathToDirectory;
+		Path pathToFile;
 		try {
-			pathToDirectory = Path.of(directoryPath);
-			if(!pathToDirectory.toFile().isDirectory()) {
-				throw new NotDirectoryException(pathToDirectory.toFile().getAbsolutePath());
-			}
+			pathToFile = Path.of(filePath);
 		} catch (InvalidPathException e) {
 			UserInteraction.sendMessage("Path is invalid");
-			return;
-		} catch (NotDirectoryException e) {
-			UserInteraction.sendMessage("Given path does not point to an directory");
 			return;
 		} catch (Exception e) {
 			UserInteraction.sendMessage("Unknown exception");
 			return;
 		}
 		
-		redirectToHandler(type, pathToDirectory);
+		redirectToHandler(type, pathToFile);
 	}
 
 	
@@ -80,23 +74,11 @@ public class CLI {
 				return;
 			} 
 			
-			export(pages, type, null);
+			new DiagramExport().handleExport(pages, null);
 			
 		} catch (IllegalArgumentException e) {
 			e.printStackTrace();
 		}
-	}
-
-	private void export(List<Page> pages, String expression, Path outputPath) {
-		if (!expression.equals(".")) {
-			try {
-				Pattern.compile(expression);
-			} catch (Exception e) {
-				System.err.println("Invalid pattern");
-				return;
-			}
-		}
-		new DiagramExport().handleExport(pages, outputPath, expression);
 	}
 
 	public void printHelp() {

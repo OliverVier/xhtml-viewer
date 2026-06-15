@@ -4,13 +4,18 @@ import java.nio.file.Path;
 import java.util.List;
 
 public class Page {
+	private String name;
 	private Path filePath;
 	private List<Param> parameters;
 	private List<Relation> relations;
-	public Page(Path filePath, List<Param> parameters, List<Relation> relations) {
+	public Page(String name, Path filePath, List<Param> parameters, List<Relation> relations) {
+		this.name = name;
 		this.filePath = filePath;
 		this.parameters = parameters;
 		this.relations = relations;
+	}
+	public String getName() {
+		return name;
 	}
 	public Path getFilePath() {
 		return filePath;

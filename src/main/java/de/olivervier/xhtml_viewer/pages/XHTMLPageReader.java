@@ -97,7 +97,7 @@ public class XHTMLPageReader implements PageReader{
 		Map<String, Page> pagesMap = new HashMap<>();
 		for(File currentFile : files) {
 			Path absPath = currentFile.toPath();
-			pagesMap.put(absPath.toString(),new Page(absPath, new ArrayList<>(), new ArrayList<>()));
+			pagesMap.put(absPath.toString(),new Page(currentFile.getName(), absPath, new ArrayList<>(), new ArrayList<>()));
 		}
 		return pagesMap;
 	}

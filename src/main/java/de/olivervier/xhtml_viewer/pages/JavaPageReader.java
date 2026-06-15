@@ -7,12 +7,18 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
-import de.olivervier.xhtml_viewer.model.InputOption;
 import de.olivervier.xhtml_viewer.model.Page;
+import de.olivervier.xhtml_viewer.model.Param;
+import de.olivervier.xhtml_viewer.model.Relation;
+import de.olivervier.xhtml_viewer.model.Relation.RelationType;
+import de.olivervier.xhtml_viewer.util.FileUtil;
 
 public class JavaPageReader implements PageReader {
 
@@ -20,63 +26,123 @@ public class JavaPageReader implements PageReader {
 	
 	@Override
 	public void init(Path path) {
-		var finder = new FileFinder(path, InputOption.JAVA);
-		List<File> files = finder.read();
-		this.pages = readPages(path, files);
-	}
-	
-	public read
-	
-	
-	private List<Page> readPages(Path basePath, List<File> files) {
 		
-		List<Page> pages = new ArrayList<Page>();
-		//Map<String, Page> pageMap = prefillPages(files);
+		File inputFile = path.toFile();
+		String fileExtension = FileUtil.getFileExtension(inputFile); 
 		
-		// Initilize classes
-		URL[] arrayOfUrls = new URL[files.size()]; 
-		for(int i = 0; i < arrayOfUrls.length; i++) {
-			try {
-				arrayOfUrls[i] = files.get(i).toURI().toURL();
-			} catch (MalformedURLException e) {
-				System.err.println(files.get(i).toPath().toString() + " could not be converted to URL");
-			}
+		if(inputFile.isDirectory() || !fileExtension.equals("jar")) {
+			throw new IllegalArgumentException("Expected path pointing to a JAR file");
 		}
 		
-		List<Class<?>> classes = new ArrayList<Class<?>>(); 
+		this.pages = readPages(inputFile);
+	}
+	
+	private List<String> findClassBinaryNames(List<File> jarFiles) {
 		
+		List<String> foundClassFilePaths = new ArrayList<String>();
+		
+		for (File f : jarFiles) {
 			
-			for(File file : files) {
-				try (URLClassLoader classLoader = new URLClassLoader(arrayOfUrls)) {
+			try (JarFile jf = new JarFile(f)) {
 				
-				// Get class name without file extension
-				String classPath = basePath.relativize(file.toPath()).toString();
-				int endIndex = classPath.indexOf('.');
-				classPath = classPath.substring(0, endIndex)
-									 .replace("\\", ".");
+				Enumeration<JarEntry> jarEntries = jf.entries();
 				
-				Class<?> clazz = classLoader.loadClass(classPath);
-				classes.add(clazz);	
-				}			
-			catch (ClassNotFoundException | IOException e) {
+				while(jarEntries.hasMoreElements()) {
+					
+					JarEntry jarEntry = jarEntries.nextElement();
+					String fileName = jarEntry.getName();
+					
+					if (fileName.endsWith(".class")) {
+						fileName = fileName.replace(".class", "")
+										   .replace("/", ".");
+						foundClassFilePaths.add(fileName);
+					}
+				}
+			} catch (IOException e) {
 				e.printStackTrace();
 			}
-		} 
+		}
+				
+		return foundClassFilePaths;
+	}
+	
+	private List<Page> readPages(File inputFile) {
+		
+		List<File> files = new ArrayList<>();
+		files.add(inputFile);
+		
+		List<String> classBinaryNames = findClassBinaryNames(files);
+		
+		URLClassLoader classLoader = createClassLoader(inputFile);
+		
+		List<Class<?>> classes = loadClasses(classLoader, classBinaryNames);
+		
+		List<Page> pages = createPages(classes, inputFile.toPath());
+			
 		return pages;
 	}
 	
-	private Map<String, Page> prefillPages(List<File> files) {
-		Map<String, Page> pagesMap = new HashMap<>();
-		for(File currentFile : files) {
-			Path absPath = currentFile.toPath();
-			pagesMap.put(absPath.toString(),new Page(absPath, new ArrayList<>(), new ArrayList<>()));
+	private URLClassLoader createClassLoader(File inputFile) {
+		try {	
+			URL[] urls = new URL[1]; 
+			urls[0] = inputFile.toURI().toURL();
+			return new URLClassLoader(urls);
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+			return null;
 		}
-		return pagesMap;
+	}
+	
+	private List<Class<?>> loadClasses (URLClassLoader classLoader, List<String> binaryNames) {
+		List<Class<?>> classes = new ArrayList<Class<?>>(); 
+		for(String binaryName : binaryNames) {
+			try {				
+				Class<?> clazz = classLoader.loadClass(binaryName);
+				classes.add(clazz);	
+			} catch (ClassNotFoundException e) {
+				System.err.println("Could not load class with binary name " + binaryName);
+			}
+		}
+		return classes;
+	}
+	
+	private List<Page> createPages(List<Class<?>> classes, Path jarPath) {
+		
+		// Go through each file
+		// When page does not exist for file, create file
+		
+		// When page has superclass,
+			// Create page when not exist
+			// finally create relation from class before to parent
+		
+		List<Page> pages = new ArrayList<>();
+		
+		Map<Class<?>, Page> classMap = new HashMap<>();
+		
+		for(Class<?> clazz : classes) {
+			
+			if(!classMap.containsKey(clazz)) {
+				classMap.put(clazz, new Page(clazz.getName(), jarPath, new ArrayList<Param>(), new ArrayList<Relation>()));
+			}
+			
+			Class<?> superclazz;
+			while((superclazz = clazz.getSuperclass()) != null) {
+				if(!classMap.containsKey(superclazz)) {
+					classMap.put(superclazz, new Page(superclazz.getName(), jarPath, new ArrayList<Param>(), new ArrayList<Relation>()));
+				}
+				
+				classMap.get(clazz).getRelations().add(new Relation(classMap.get(superclazz), RelationType.COMPOSITION));
+				clazz = superclazz;
+			}
+			
+		}
+		
+		pages.addAll(classMap.values());
+		return pages ;
 	}
 
 	@Override
 	public List<Page> getPages() {
 		return pages;
 	}
-
 }
